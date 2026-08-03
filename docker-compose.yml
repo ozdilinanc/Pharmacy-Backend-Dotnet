@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: pharmacy_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword123
+      POSTGRES_DB: PharmacyDb
+    ports:
+      - "5432:5432"
+    restart: always
+
+  redis_cache:
+    image: redis:7-alpine
+    container_name: pharmacy_redis
+    ports:
+      - "6379:6379"
+    restart: always
