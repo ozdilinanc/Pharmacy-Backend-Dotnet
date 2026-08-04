@@ -14,6 +14,8 @@ namespace PharmacyProject.Core.Entities
         public int DistrictId { get; set; }
         public District District { get; set; } = null!;
 
+        public ICollection<PharmacyInsurance> PharmacyInsurances { get; set; }
+
         public List<InsuranceCompanyEnum> SupportedInsurances { get; set; } = new();
     }
 }

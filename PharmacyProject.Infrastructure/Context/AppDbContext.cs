@@ -15,6 +15,8 @@ namespace PharmacyProject.Infrastructure.Context
         public DbSet<District> Districts { get; set; }
         public DbSet<Pharmacy> Pharmacies { get; set; }
         public DbSet<UnmatchedPharmacy> UnmatchedPharmacies { get; set; }
+        public DbSet<InsuranceCompany> InsuranceCompanies { get; set; }
+        public DbSet<PharmacyInsurance> PharmacyInsurances { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
