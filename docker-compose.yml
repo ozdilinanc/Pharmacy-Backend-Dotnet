@@ -6,7 +6,7 @@ services:
     container_name: pharmacy_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword123
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: PharmacyDb
     ports:
       - "5432:5432"

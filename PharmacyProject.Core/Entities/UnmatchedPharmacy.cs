@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PharmacyProject.Core.Enums;
 
 namespace PharmacyProject.Core.Entities
 {
-    internal class UnmatchedPharmacy
+    public class UnmatchedPharmacy : BaseEntity
     {
+        public string ScrapedName { get; set; } = string.Empty;
+        public string ScrapedAddress { get; set; } = string.Empty;
+        public string? ScrapedPhoneNumber { get; set; }
+
+        public InsuranceCompanyEnum SourceInsurance { get; set; }
+
+        public bool IsResolved { get; set; } = false;
+
+        public int? MatchedPharmacyId { get; set; }
+        public Pharmacy? MatchedPharmacy { get; set; }
     }
 }
