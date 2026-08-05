@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PharmacyProject.Core.Entities;
 
-namespace PharmacyProject.Infrastructure.Context
+namespace PharmacyProject.Infrastructure.Persistence.Context
 {
     public class AppDbContext : DbContext
     {

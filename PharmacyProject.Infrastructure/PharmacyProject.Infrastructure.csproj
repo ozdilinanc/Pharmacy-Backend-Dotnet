@@ -11,7 +11,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PharmacyProject.Application\PharmacyProject.Application.csproj" />
     <ProjectReference Include="..\PharmacyProject.Core\PharmacyProject.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ExternalServices\" />
+    <Folder Include="Caching\" />
+    <Folder Include="BackgroundJobs\" />
+    <Folder Include="Security\" />
   </ItemGroup>
 
 </Project>
