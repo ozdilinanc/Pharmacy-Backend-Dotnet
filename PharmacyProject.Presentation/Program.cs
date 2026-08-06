@@ -15,7 +15,6 @@ namespace PharmacyProject.Presentation
             builder.Services.AddControllers();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
 
             builder.Services.AddEndpointsApiExplorer();
@@ -25,6 +24,13 @@ namespace PharmacyProject.Presentation
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+
+            builder.Services.AddScoped<ICityRepository, CityRepository>();
+            builder.Services.AddScoped<IDistrictRepository, DistrictRepository>();
+            builder.Services.AddScoped<IInsuranceRepository, InsuranceRepository>();
+            builder.Services.AddScoped<IPharmacyInsuranceRepository, PharmacyInsuranceRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUnmatchedPharmacyRepository, UnmatchedRepository>();
 
             var app = builder.Build();
 
@@ -39,7 +45,6 @@ namespace PharmacyProject.Presentation
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 
