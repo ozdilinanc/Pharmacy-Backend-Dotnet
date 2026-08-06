@@ -8,6 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: PharmacyDb
+      Jwt__Secret: ${JWT_SECRET}
     ports:
       - "5433:5432"
     restart: always
@@ -18,3 +19,4 @@ services:
     ports:
       - "6379:6379"
     restart: always
+

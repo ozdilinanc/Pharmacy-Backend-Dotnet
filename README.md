@@ -32,7 +32,7 @@ Bu proje, sürdürülebilirlik ve kodun test edilebilirliği göz önünde bulun
 - **Kimlik Doğrulama:** JWT (JSON Web Token) tabanlı yetkilendirme (Planlanıyor)
 - **Konfigürasyon Güvenliği:** .NET User Secrets ve Docker ortam değişkenleri (Şifrelerin gizliliği için)
 - **Entegrasyonlar:** Farklı JSON/API servislerinden veri toplamak için HttpClient ve entegrasyon servisleri.
-
+- **Veri Güvenliği:** Şifrelerin güvenli bir şekilde saklanması için BCrypt ile otomatik salting ve hashing işlemleri.
 ---
 
 ## 📂 Proje Mimarisi ve Geliştirme Durumu (✅ Bitenler)
@@ -56,9 +56,9 @@ PharmacyProject.sln
 ├── 2. Application Katmanı
 │   ├── DTOs/
 │   │   ├── Auth/
-│   │   │   ├── RegisterDto.cs
-│   │   │   ├── LoginDto.cs
-│   │   │   └── TokenDto.cs
+│   │   │   ├── RegisterDto.cs ✅
+│   │   │   ├── LoginDto.cs ✅
+│   │   │   └── TokenDto.cs ✅
 │   │   └── Pharmacy/
 │   │       ├── PharmacyDto.cs ✅
 │   │       ├── ScrapedPharmacyDto.cs ✅
@@ -75,15 +75,17 @@ PharmacyProject.sln
 │   │   │   ├── IUserRepository.cs ✅
 │   │   │   └── IUnmatchedPharmacyRepository.cs ✅
 │   │   ├── Security/
-│   │   │   └──  IPasswordHasher.cs ✅
+│   │   │   ├── ITokenService.cs ✅
+│   │   │   └── IPasswordHasher.cs ✅
 │   │   ├── External/
 │   │   │   ├── IInsuranceScraperService.cs
 │   │   │   └── IOnDutyApiService.cs
 │   │   └── Services/
-│   │       ├── IAuthService.cs
+│   │       ├── IAuthService.cs ✅
 │   │       └── ICacheService.cs
 │   └── Services/
 │       ├── PharmacyMatchingService.cs
+│       ├── AuthService.cs ✅
 │       └── AdminManualMatchService.cs
 │
 ├── 3. Infrastructure Katmanı
@@ -105,8 +107,8 @@ PharmacyProject.sln
 │   │   ├── [Diğer Servisler]
 │   │   └── OnDutyPharmacyApiService.cs
 │   ├── Security/
-│   │   ├── PasswordHasher.cs
-│   │   └── AuthService.cs
+│   │   ├── PasswordHasher.cs ✅
+│   │   └── TokenService.cs ✅
 │   ├── Caching/
 │   │   └── RedisCacheService.cs
 │   └── BackgroundJobs/
@@ -115,7 +117,7 @@ PharmacyProject.sln
 │
 └── 4. Presentation (API) Katmanı
     ├── Controllers/
-    │   ├── AuthController.cs
+    │   ├── AuthController.cs ✅
     │   ├── PharmaciesController.cs
     │   └── AdminController.cs
     ├── Program.cs
