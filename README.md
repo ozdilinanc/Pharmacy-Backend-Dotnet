@@ -82,10 +82,12 @@ PharmacyProject.sln
 │   │   │   └── IOnDutyApiService.cs
 │   │   └── Services/
 │   │       ├── IAuthService.cs ✅
+│   │       ├── IPharmacyService.cs ✅
 │   │       └── ICacheService.cs
 │   └── Services/
 │       ├── PharmacyMatchingService.cs
 │       ├── AuthService.cs ✅
+│       ├── PharmacyService.cs ✅
 │       └── AdminManualMatchService.cs
 │
 ├── 3. Infrastructure Katmanı
