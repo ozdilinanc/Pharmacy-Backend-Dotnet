@@ -60,20 +60,20 @@ PharmacyProject.sln
 │   │   │   ├── LoginDto.cs
 │   │   │   └── TokenDto.cs
 │   │   └── Pharmacy/
-│   │       ├── PharmacyDto.cs
-│   │       ├── ScrapedPharmacyDto.cs
-│   │       └── ManualMatchRequestDto.cs
+│   │       ├── PharmacyDto.cs ✅
+│   │       ├── ScrapedPharmacyDto.cs ✅
+│   │       └── ManualMatchRequestDto.cs ✅
 │   ├── Interfaces/
 │   │   ├── Repositories/
 │   │   │   ├── IGenericRepository.cs ✅
-│   │   │   ├── IPharmacyRepository.cs
+│   │   │   ├── IPharmacyRepository.cs ✅
 │   │   │   ├── IUnitOfWork.cs ✅
-│   │   │   ├── ICityRepository.cs
-│   │   │   ├── IDistrictRepository.cs
-│   │   │   ├── IInsuranceRepository.cs
-│   │   │   ├── IPharmacyInsuranceRepository.cs
-│   │   │   ├── IUserRepository.cs
-│   │   │   └── IUnmatchedPharmacyRepository.cs
+│   │   │   ├── ICityRepository.cs ✅
+│   │   │   ├── IDistrictRepository.cs ✅
+│   │   │   ├── IInsuranceRepository.cs ✅
+│   │   │   ├── IPharmacyInsuranceRepository.cs ✅
+│   │   │   ├── IUserRepository.cs ✅
+│   │   │   └── IUnmatchedPharmacyRepository.cs ✅
 │   │   ├── External/
 │   │   │   ├── IInsuranceScraperService.cs
 │   │   │   └── IOnDutyApiService.cs
@@ -91,13 +91,13 @@ PharmacyProject.sln
 │   │   └── Repositories/
 │   │       ├── GenericRepository.cs ✅
 │   │       ├── UnitOfWork.cs ✅
-│   │       ├── PharmacyRepository.cs
-│   │       ├── CityRepository.cs
-│   │       ├── DistrictRepository.cs
-│   │       ├── InsuranceRepository.cs
-│   │       ├── PharmacyInsuranceRepository.cs
-│   │       ├── UserRepository.cs
-│   │       └── UnmatchedRepository.cs
+│   │       ├── PharmacyRepository.cs ✅
+│   │       ├── CityRepository.cs ✅
+│   │       ├── DistrictRepository.cs ✅
+│   │       ├── InsuranceRepository.cs ✅
+│   │       ├── PharmacyInsuranceRepository.cs ✅
+│   │       ├── UserRepository.cs ✅
+│   │       └── UnmatchedRepository.cs ✅
 │   ├── ExternalServices/
 │   │   ├── AllianzScraperService.cs
 │   │   ├── [Diğer Servisler]
