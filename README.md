@@ -74,6 +74,8 @@ PharmacyProject.sln
 │   │   │   ├── IPharmacyInsuranceRepository.cs ✅
 │   │   │   ├── IUserRepository.cs ✅
 │   │   │   └── IUnmatchedPharmacyRepository.cs ✅
+│   │   ├── Security/
+│   │   │   └──  IPasswordHasher.cs ✅
 │   │   ├── External/
 │   │   │   ├── IInsuranceScraperService.cs
 │   │   │   └── IOnDutyApiService.cs
@@ -103,6 +105,7 @@ PharmacyProject.sln
 │   │   ├── [Diğer Servisler]
 │   │   └── OnDutyPharmacyApiService.cs
 │   ├── Security/
+│   │   ├── PasswordHasher.cs
 │   │   └── AuthService.cs
 │   ├── Caching/
 │   │   └── RedisCacheService.cs
