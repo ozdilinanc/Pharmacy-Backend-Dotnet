@@ -21,7 +21,6 @@
     <Folder Include="ExternalServices\" />
     <Folder Include="Caching\" />
     <Folder Include="BackgroundJobs\" />
-    <Folder Include="Security\" />
   </ItemGroup>
 
 </Project>

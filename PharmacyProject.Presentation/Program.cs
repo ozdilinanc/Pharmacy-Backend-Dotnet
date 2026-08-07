@@ -86,7 +86,8 @@ namespace PharmacyProject.Presentation
             builder.Services.AddScoped<IInsuranceRepository, InsuranceRepository>();
             builder.Services.AddScoped<IPharmacyInsuranceRepository, PharmacyInsuranceRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IUnmatchedPharmacyRepository, UnmatchedRepository>();
+            builder.Services.AddScoped<IUnmatchedPharmacyRepository, UnmatchedPharmacyRepository>();
+            builder.Services.AddScoped<IPharmacyService, PharmacyService>();
 
             var app = builder.Build();
 

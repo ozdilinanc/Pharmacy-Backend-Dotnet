@@ -12,8 +12,6 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\External\" />
-    <Folder Include="Interfaces\Services\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

@@ -4,9 +4,9 @@ using PharmacyProject.Infrastructure.Persistence.Context;
 
 namespace PharmacyProject.Infrastructure.Persistence.Repositories
 {
-    public class UnmatchedRepository : GenericRepository<UnmatchedPharmacy>, IUnmatchedPharmacyRepository
+    public class UnmatchedPharmacyRepository : GenericRepository<UnmatchedPharmacy>, IUnmatchedPharmacyRepository
     {
-        public UnmatchedRepository(AppDbContext context) : base(context)
+        public UnmatchedPharmacyRepository(AppDbContext context) : base(context)
         {
         }
     }

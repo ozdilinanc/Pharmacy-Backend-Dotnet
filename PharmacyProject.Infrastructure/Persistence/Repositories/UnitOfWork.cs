@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using PharmacyProject.Application.Interfaces.Repositories;
-using PharmacyProject.Core.Entities;
 using PharmacyProject.Infrastructure.Persistence.Context;
 
 
@@ -11,40 +10,39 @@ namespace PharmacyProject.Infrastructure.Persistence.Repositories
         private readonly AppDbContext _context;
         private IDbContextTransaction? _transaction;
 
-        private IGenericRepository<User>? _userRepository;
-        private IGenericRepository<City>? _cityRepository;
-        private IGenericRepository<District>? _districtRepository;
-        private IGenericRepository<Pharmacy>? _pharmacyRepository;
-        private IGenericRepository<InsuranceCompany>? _insuranceCompanyRepository;
-        private IGenericRepository<PharmacyInsurance>? _pharmacyInsuranceRepository;
-        private IGenericRepository<UnmatchedPharmacy>? _unmatchedPharmacyRepository;
+        private IUserRepository? _userRepository;
+        private ICityRepository? _cityRepository;
+        private IDistrictRepository? _districtRepository;
+        private IPharmacyRepository? _pharmacyRepository;
+        private IInsuranceRepository? _insuranceCompanyRepository;
+        private IPharmacyInsuranceRepository? _pharmacyInsuranceRepository;
+        private IUnmatchedPharmacyRepository? _unmatchedPharmacyRepository;
 
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
         }
 
-        public IGenericRepository<User> Users
-            => _userRepository ??= new GenericRepository<User>(_context);
+        public IUserRepository Users
+            => _userRepository ??= new UserRepository(_context);
 
-        public IGenericRepository<City> Cities
-            => _cityRepository ??= new GenericRepository<City>(_context);
+        public ICityRepository Cities
+            => _cityRepository ??= new CityRepository(_context);
 
-        public IGenericRepository<District> Districts
-            => _districtRepository ??= new GenericRepository<District>(_context);
+        public IDistrictRepository Districts
+            => _districtRepository ??= new DistrictRepository(_context);
 
-        public IGenericRepository<Pharmacy> Pharmacies
-           => _pharmacyRepository ??= new GenericRepository<Pharmacy>(_context);
+        public IPharmacyRepository Pharmacies
+           => _pharmacyRepository ??= new PharmacyRepository(_context);
 
-        public IGenericRepository<InsuranceCompany> InsuranceCompanies
-            => _insuranceCompanyRepository ??= new GenericRepository<InsuranceCompany>(_context);
+        public IInsuranceRepository InsuranceCompanies
+            => _insuranceCompanyRepository ??= new InsuranceRepository(_context);
 
-        public IGenericRepository<PharmacyInsurance> PharmacyInsurances
-            => _pharmacyInsuranceRepository ??= new GenericRepository<PharmacyInsurance>(_context);
+        public IPharmacyInsuranceRepository PharmacyInsurances
+            => _pharmacyInsuranceRepository ??= new PharmacyInsuranceRepository(_context);
 
-        public IGenericRepository<UnmatchedPharmacy> UnmatchedPharmacies
-            => _unmatchedPharmacyRepository ??= new GenericRepository<UnmatchedPharmacy>(_context);
-
+        public IUnmatchedPharmacyRepository UnmatchedPharmacies
+            => _unmatchedPharmacyRepository ??= new UnmatchedPharmacyRepository(_context);
 
         public async Task<int> SaveChangesAsync()
         {
