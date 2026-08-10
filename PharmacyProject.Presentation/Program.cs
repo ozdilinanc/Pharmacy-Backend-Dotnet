@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Hangfire;
+using Hangfire.PostgreSql;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -31,6 +33,15 @@ namespace PharmacyProject.Presentation
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString));
+
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(options =>
+                    options.UseNpgsqlConnection(connectionString)));
+
+            builder.Services.AddHangfireServer();
 
             var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
                             ?? builder.Configuration["Jwt:Secret"];
@@ -122,7 +133,7 @@ namespace PharmacyProject.Presentation
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers(); // Fazladan yazılan ikinci app.MapControllers() satırı silindi.
+            app.MapControllers();
 
             using (var scope = app.Services.CreateScope())
             {
@@ -130,6 +141,13 @@ namespace PharmacyProject.Presentation
                 await DatabaseSeeder.SeedCitiesAndDistrictsAsync(context);
                 await DatabaseSeeder.SeedPharmaciesAsync(context);
             }
+
+            app.MapControllers();
+
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
+            });
 
             app.Run();
         }
