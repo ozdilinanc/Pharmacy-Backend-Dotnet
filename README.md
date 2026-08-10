@@ -59,6 +59,10 @@ PharmacyProject.sln
 │   │   │   ├── RegisterDto.cs ✅
 │   │   │   ├── LoginDto.cs ✅
 │   │   │   └── TokenDto.cs ✅
+│   │   ├── External/
+│   │   │   └── NosyApi/
+│   │   │       ├── NosyApiRecentPharmacyDto.cs ✅
+│   │   │       └── NosyApiOnDutyPharmacyDto.cs ✅
 │   │   └── Pharmacy/
 │   │       ├── PharmacyDto.cs ✅
 │   │       ├── ScrapedPharmacyDto.cs ✅
@@ -79,6 +83,7 @@ PharmacyProject.sln
 │   │   │   └── IPasswordHasher.cs ✅
 │   │   ├── External/
 │   │   │   ├── IInsuranceScraperService.cs
+│   │   │   ├── INoisyApiService.cs ✅
 │   │   │   └── IOnDutyApiService.cs
 │   │   └── Services/
 │   │       ├── IAuthService.cs ✅
@@ -92,6 +97,7 @@ PharmacyProject.sln
 │
 ├── 3. Infrastructure Katmanı
 │   ├── Persistence/
+│   │   ├── DatabaseSeeder.cs ✅
 │   │   ├── Contexts/
 │   │   │   └── AppDbContext.cs ✅
 │   │   └── Repositories/
@@ -111,6 +117,9 @@ PharmacyProject.sln
 │   ├── Security/
 │   │   ├── PasswordHasher.cs ✅
 │   │   └── TokenService.cs ✅
+│   ├── Workers/
+│   │   ├── OnDutyPharmacySyncWorker.cs ✅
+│   │   └── RecentPharmacySyncWorker.cs ✅
 │   ├── Caching/
 │   │   └── RedisCacheService.cs
 │   └── BackgroundJobs/
@@ -120,8 +129,10 @@ PharmacyProject.sln
 └── 4. Presentation (API) Katmanı
     ├── Controllers/
     │   ├── AuthController.cs ✅
-    │   ├── PharmaciesController.cs
+    │   ├── PharmaciesController.cs ✅
     │   └── AdminController.cs
+    ├── ililce.json
+    ├── pharmacies_seed.json
     ├── Program.cs
     └── appsettings.json
 </pre>

@@ -37,6 +37,10 @@ namespace PharmacyProject.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -60,6 +64,10 @@ namespace PharmacyProject.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Slug")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -116,6 +124,9 @@ namespace PharmacyProject.Infrastructure.Migrations
 
                     b.Property<int>("DistrictId")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("IsOnDuty")
+                        .HasColumnType("boolean");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");

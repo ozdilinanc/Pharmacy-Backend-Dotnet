@@ -2,10 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Security;
 using PharmacyProject.Application.Interfaces.Services;
 using PharmacyProject.Application.Services;
+using PharmacyProject.Infrastructure.ExternalServices;
+using PharmacyProject.Infrastructure.Persistence;
 using PharmacyProject.Infrastructure.Persistence.Context;
 using PharmacyProject.Infrastructure.Persistence.Repositories;
 using PharmacyProject.Infrastructure.Security;
@@ -15,14 +18,22 @@ namespace PharmacyProject.Presentation
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
+            DotNetEnv.Env.TraversePath().Load();
+
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
 
+            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
+                                   ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(connectionString));
+
+            var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
+                            ?? builder.Configuration["Jwt:Secret"];
 
             builder.Services.AddAuthentication(options =>
             {
@@ -39,7 +50,7 @@ namespace PharmacyProject.Presentation
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = builder.Configuration["Jwt:Issuer"],
                     ValidAudience = builder.Configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret!))
                 };
             });
 
@@ -47,6 +58,10 @@ namespace PharmacyProject.Presentation
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pharmacy API", Version = "v1" });
+
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -73,7 +88,6 @@ namespace PharmacyProject.Presentation
                 });
             });
 
-
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -81,13 +95,19 @@ namespace PharmacyProject.Presentation
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICityRepository, CityRepository>();
             builder.Services.AddScoped<IDistrictRepository, DistrictRepository>();
+            builder.Services.AddScoped<IPharmacyRepository, PharmacyRepository>();
             builder.Services.AddScoped<IInsuranceRepository, InsuranceRepository>();
             builder.Services.AddScoped<IPharmacyInsuranceRepository, PharmacyInsuranceRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUnmatchedPharmacyRepository, UnmatchedPharmacyRepository>();
+
             builder.Services.AddScoped<IPharmacyService, PharmacyService>();
+            builder.Services.AddHttpClient<INosyApiService, NosyApiService>();
+
+            // builder.Services.AddHostedService<PharmacyProject.Infrastructure.Workers.RecentPharmacySyncWorker>();
+            // builder.Services.AddHostedService<PharmacyProject.Infrastructure.Workers.OnDutyPharmacySyncWorker>();
 
             var app = builder.Build();
 
@@ -102,7 +122,14 @@ namespace PharmacyProject.Presentation
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
+            app.MapControllers(); // Fazladan yazılan ikinci app.MapControllers() satırı silindi.
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await DatabaseSeeder.SeedCitiesAndDistrictsAsync(context);
+                await DatabaseSeeder.SeedPharmaciesAsync(context);
+            }
 
             app.Run();
         }

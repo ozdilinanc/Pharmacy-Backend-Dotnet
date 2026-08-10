@@ -10,8 +10,4 @@
     <ProjectReference Include="..\PharmacyProject.Core\PharmacyProject.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\External\" />
-  </ItemGroup>
-
 </Project>
