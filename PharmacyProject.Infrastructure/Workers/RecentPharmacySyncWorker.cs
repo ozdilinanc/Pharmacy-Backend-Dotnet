@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.External;
@@ -7,11 +6,10 @@ using PharmacyProject.Application.Interfaces.Services;
 
 namespace PharmacyProject.Infrastructure.Workers
 {
-    public class RecentPharmacySyncWorker : BackgroundService
+    public class RecentPharmacySyncWorker
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<RecentPharmacySyncWorker> _logger;
-        private readonly TimeSpan _period = TimeSpan.FromDays(7);
 
         public RecentPharmacySyncWorker(IServiceProvider serviceProvider, ILogger<RecentPharmacySyncWorker> logger)
         {
@@ -19,54 +17,52 @@ namespace PharmacyProject.Infrastructure.Workers
             _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task SyncRecentPharmaciesAsync()
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                _logger.LogInformation("Hangfire: Yeni eczane senkronizasyonu başladı.");
+
+                await using (var scope = _serviceProvider.CreateAsyncScope())
                 {
-                    _logger.LogInformation("Yeni eczane senkronizasyonu başladı.");
+                    var nosyApiService = scope.ServiceProvider.GetRequiredService<INosyApiService>();
+                    var pharmacyService = scope.ServiceProvider.GetRequiredService<IPharmacyService>();
 
-                    await using (var scope = _serviceProvider.CreateAsyncScope())
+                    var recentPharmacies = await nosyApiService.GetRecentPharmaciesAsync();
+                    var allDbPharmacies = await pharmacyService.GetAllAsync();
+
+                    foreach (var apiPharmacy in recentPharmacies)
                     {
-                        var nosyApiService = scope.ServiceProvider.GetRequiredService<INosyApiService>();
-                        var pharmacyService = scope.ServiceProvider.GetRequiredService<IPharmacyService>();
+                        var normalizedApiPhone = NormalizePhone(apiPharmacy.Phone);
 
-                        var recentPharmacies = await nosyApiService.GetRecentPharmaciesAsync();
-                        var allDbPharmacies = await pharmacyService.GetAllAsync();
+                        bool existsInDb = allDbPharmacies.Any(dbP =>
+                            NormalizePhone(dbP.PhoneNumber) == normalizedApiPhone ||
+                            (dbP.Name != null && apiPharmacy.PharmacyName != null && dbP.Name.Contains(apiPharmacy.PharmacyName.Replace("Eczanesi", "").Trim())));
 
-                        foreach (var apiPharmacy in recentPharmacies)
+                        if (!existsInDb)
                         {
-                            var normalizedApiPhone = NormalizePhone(apiPharmacy.Phone);
-
-                            bool existsInDb = allDbPharmacies.Any(dbP =>
-                                NormalizePhone(dbP.PhoneNumber) == normalizedApiPhone ||
-                                (dbP.Name != null && apiPharmacy.PharmacyName != null && dbP.Name.Contains(apiPharmacy.PharmacyName.Replace("Eczanesi", "").Trim())));
-
-                            if (!existsInDb)
+                            var createDto = new CreatePharmacyDto
                             {
-                                var createDto = new CreatePharmacyDto
-                                {
-                                    Name = apiPharmacy.PharmacyName ?? "Bilinmiyor",
-                                    PhoneNumber = apiPharmacy.Phone,
-                                    Address = apiPharmacy.Address,
-                                    Latitude = apiPharmacy.Latitude,
-                                    Longitude = apiPharmacy.Longitude,
-                                    DistrictId = 1
-                                };
+                                Name = apiPharmacy.PharmacyName ?? "Bilinmiyor",
+                                PhoneNumber = apiPharmacy.Phone,
+                                Address = apiPharmacy.Address,
+                                Latitude = apiPharmacy.Latitude,
+                                Longitude = apiPharmacy.Longitude,
+                                DistrictId = 1 // Şimdilik varsayılan 1
+                            };
 
-                                await pharmacyService.CreateAsync(createDto);
-                                _logger.LogInformation($"Yeni eczane sisteme eklendi: {apiPharmacy.PharmacyName}");
-                            }
+                            await pharmacyService.CreateAsync(createDto);
+                            _logger.LogInformation($"Hangfire: Yeni eczane sisteme eklendi: {apiPharmacy.PharmacyName}");
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "RecentPharmacySyncWorker hata fırlattı.");
-                }
 
-                await Task.Delay(_period, stoppingToken);
+                    _logger.LogInformation("Hangfire: Yeni eczane senkronizasyonu tamamlandı.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hangfire: RecentPharmacySyncWorker hata fırlattı.");
+                throw;
             }
         }
 

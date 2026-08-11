@@ -150,7 +150,14 @@ namespace PharmacyProject.Presentation
             Hangfire.RecurringJob.AddOrUpdate<PharmacyProject.Infrastructure.Workers.OnDutyPharmacySyncWorker>(
                 "nobetci-eczane-guncelle",
                 worker => worker.SyncOnDutyPharmaciesAsync(),
-                "5 0 * * *", // CRON 
+                "5 0 * * *", // CRON  Formati: gece 00.05
+                new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
+            );
+
+            Hangfire.RecurringJob.AddOrUpdate<PharmacyProject.Infrastructure.Workers.RecentPharmacySyncWorker>(
+                "yeni-eczane-guncelle",
+                worker => worker.SyncRecentPharmaciesAsync(),
+                "0 0 * * 0", // CRON Formati: Haftada 1 gun
                 new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
             );
 
