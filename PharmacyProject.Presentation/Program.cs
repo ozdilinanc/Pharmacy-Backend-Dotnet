@@ -133,8 +133,6 @@ namespace PharmacyProject.Presentation
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
-
             using (var scope = app.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -142,12 +140,19 @@ namespace PharmacyProject.Presentation
                 await DatabaseSeeder.SeedPharmaciesAsync(context);
             }
 
-            app.MapControllers();
-
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            app.MapHangfireDashboard("/hangfire", new DashboardOptions
             {
                 Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
             });
+
+            app.MapControllers();
+
+            Hangfire.RecurringJob.AddOrUpdate<PharmacyProject.Infrastructure.Workers.OnDutyPharmacySyncWorker>(
+                "nobetci-eczane-guncelle",
+                worker => worker.SyncOnDutyPharmaciesAsync(),
+                "5 0 * * *", // CRON 
+                new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
+            );
 
             app.Run();
         }
