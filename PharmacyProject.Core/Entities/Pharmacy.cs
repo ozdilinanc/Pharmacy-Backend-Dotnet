@@ -16,7 +16,7 @@ namespace PharmacyProject.Core.Entities
 
         public bool IsOnDuty { get; set; } = false;
 
-        public ICollection<PharmacyInsurance> PharmacyInsurances { get; set; }
+        public ICollection<PharmacyInsurance> PharmacyInsurances { get; set; } = new List<PharmacyInsurance>();
 
         public List<InsuranceCompanyEnum> SupportedInsurances { get; set; } = new();
     }
