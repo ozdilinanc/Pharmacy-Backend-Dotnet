@@ -6,9 +6,7 @@ namespace PharmacyProject.Application.Interfaces.Services
     {
         Task<PharmacyResponseDto> GetByIdAsync(int id);
         Task<IEnumerable<PharmacyResponseDto>> GetAllAsync();
-
-
-        Task<CreatePharmacyDto> CreateAsync(CreatePharmacyDto createPharmacyDto);
+        Task<PharmacyResponseDto> CreateAsync(CreatePharmacyDto createPharmacyDto);
         Task UpdateAsync(UpdatePharmacyDto updatePharmacyDto);
         Task DeleteAsync(int id);
     }

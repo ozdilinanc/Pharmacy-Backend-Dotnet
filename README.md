@@ -49,9 +49,10 @@ PharmacyProject.sln
 │   │   ├── PharmacyInsurance.cs ✅
 │   │   ├── User.cs ✅
 │   │   └── UnmatchedPharmacy.cs ✅
-│   └── Enums/
-│       ├── InsuranceCompanyEnum.cs ✅
-│       └── UserRole.cs ✅
+│   ├── Enums/
+│   │   ├── InsuranceCompanyEnum.cs ✅
+│   │   └── UserRole.cs ✅
+│   └── DependencyInjection.cs
 │
 ├── 2. Application Katmanı
 │   ├── DTOs/
@@ -91,11 +92,12 @@ PharmacyProject.sln
 │   │       ├── IAuthService.cs ✅
 │   │       ├── IPharmacyService.cs ✅
 │   │       └── ICacheService.cs
-│   └── Services/
-│       ├── PharmacyMatchingService.cs
-│       ├── AuthService.cs ✅
-│       ├── PharmacyService.cs ✅
-│       └── AdminManualMatchService.cs
+│   ├── Services/
+│   │   ├── PharmacyMatchingService.cs
+│   │   ├── AuthService.cs ✅
+│   │   ├── PharmacyService.cs ✅
+│   │   └── AdminManualMatchService.cs
+│   └── DependencyInjection.cs
 │
 ├── 3. Infrastructure Katmanı
 │   ├── Persistence/
@@ -122,20 +124,24 @@ PharmacyProject.sln
 │   │   └── TokenService.cs ✅
 │   ├── Workers/
 │   │   ├── OnDutyPharmacySyncWorker.cs ✅
+│   │   ├── INSURANCE
 │   │   └── RecentPharmacySyncWorker.cs ✅
 │   ├── Caching/
 │   │   └── RedisCacheService.cs
-│   └── BackgroundJobs/
-│       ├── HangfireJobScheduler.cs
-│       └── SyncWorkers.cs
+│   ├── BackgroundJobs/
+│   │   └── HangfireJobScheduler.cs ✅
+│   └── DependencyInjection.cs
 │
 └── 4. Presentation (API) Katmanı
     ├── Controllers/
     │   ├── AuthController.cs ✅
     │   ├── PharmaciesController.cs ✅
     │   └── AdminController.cs
+    ├── Middleware/
+    │   └── GlobalExceptionMiddleware.cs ✅
     ├── ililce.json
     ├── pharmacies_seed.json
     ├── Program.cs
+    ├── DependencyInjection.cs
     └── appsettings.json
 </pre>

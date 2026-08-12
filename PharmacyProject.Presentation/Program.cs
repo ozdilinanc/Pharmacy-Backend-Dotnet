@@ -16,6 +16,8 @@ builder.Services.AddPresentationServices(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<PharmacyProject.Presentation.Middlewares.GlobalExceptionMiddleware>();
+
 // 3. HTTP İSTEK HATTI
 if (app.Environment.IsDevelopment())
 {
@@ -42,5 +44,8 @@ using (var scope = app.Services.CreateScope())
     await DatabaseSeeder.SeedCitiesAndDistrictsAsync(context);
     await DatabaseSeeder.SeedPharmaciesAsync(context);
 }
+
+// 5. HANGFIRE TIMERS
+PharmacyProject.Infrastructure.BackgroundJobs.HangfireJobScheduler.ScheduleRecurringJobs();
 
 app.Run();

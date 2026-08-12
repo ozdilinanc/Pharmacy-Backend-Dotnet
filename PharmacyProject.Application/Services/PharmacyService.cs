@@ -14,7 +14,7 @@ namespace PharmacyProject.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<CreatePharmacyDto> CreateAsync(CreatePharmacyDto createPharmacyDto)
+        public async Task<PharmacyResponseDto> CreateAsync(CreatePharmacyDto createPharmacyDto)
         {
             var newPharmacy = new Pharmacy
             {
@@ -27,9 +27,19 @@ namespace PharmacyProject.Application.Services
             };
 
             await _unitOfWork.Pharmacies.AddAsync(newPharmacy);
+
             await _unitOfWork.SaveChangesAsync();
 
-            return createPharmacyDto;
+            return new PharmacyResponseDto
+            {
+                Id = newPharmacy.Id,
+                Name = newPharmacy.Name,
+                Address = newPharmacy.Address,
+                PhoneNumber = newPharmacy.PhoneNumber,
+                Latitude = newPharmacy.Latitude,
+                Longitude = newPharmacy.Longitude,
+                DistrictId = newPharmacy.DistrictId
+            };
         }
 
         public async Task<PharmacyResponseDto> GetByIdAsync(int id)
@@ -46,7 +56,8 @@ namespace PharmacyProject.Application.Services
                 Address = pharmacy.Address,
                 PhoneNumber = pharmacy.PhoneNumber,
                 Latitude = pharmacy.Latitude,
-                Longitude = pharmacy.Longitude
+                Longitude = pharmacy.Longitude,
+                DistrictId = pharmacy.DistrictId
             };
         }
 
@@ -61,7 +72,8 @@ namespace PharmacyProject.Application.Services
                 Address = p.Address,
                 PhoneNumber = p.PhoneNumber,
                 Latitude = p.Latitude,
-                Longitude = p.Longitude
+                Longitude = p.Longitude,
+                DistrictId = p.DistrictId
             });
         }
 
