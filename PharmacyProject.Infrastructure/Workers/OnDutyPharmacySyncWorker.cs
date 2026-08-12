@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Application.Interfaces.Repositories;
+using PharmacyProject.Core.Entities;
 using System.Globalization;
 
 namespace PharmacyProject.Infrastructure.Workers
@@ -28,6 +29,7 @@ namespace PharmacyProject.Infrastructure.Workers
                     var nosyApiService = scope.ServiceProvider.GetRequiredService<INosyApiService>();
                     var pharmacyRepo = scope.ServiceProvider.GetRequiredService<IPharmacyRepository>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var unmatchedRepo = scope.ServiceProvider.GetRequiredService<IUnmatchedPharmacyRepository>();
 
                     var currentOnDuties = await pharmacyRepo.GetAllAsync();
                     var activeOnDuties = currentOnDuties.Where(p => p.IsOnDuty).ToList();
@@ -39,7 +41,6 @@ namespace PharmacyProject.Infrastructure.Workers
                     await uow.SaveChangesAsync();
 
                     var allDbPharmacies = await pharmacyRepo.GetAllAsync();
-
                     var apiPharmacies = await nosyApiService.GetOnDutyPharmaciesAsync("ankara");
 
                     foreach (var apiPharmacy in apiPharmacies)
@@ -63,7 +64,20 @@ namespace PharmacyProject.Infrastructure.Workers
                         }
                         else
                         {
-                            _logger.LogWarning($"Eşleşme bulunamadı! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
+                            _logger.LogWarning($"Eşleşme bulunamadı, tabloya ekleniyor! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
+
+                            var unmatched = new UnmatchedPharmacy
+                            {
+                                ScrapedName = apiPharmacy.PharmacyName ?? "Bilinmiyor",
+                                ScrapedPhoneNumber = apiPharmacy.Phone,
+                                ScrapedAddress = $"{apiPharmacy.Address} - İlçe: {apiPharmacy.District}",
+
+                                SourceInsurance = null,
+
+                                DataSource = "NosyAPI (Nöbetçi)"
+                            };
+
+                            await unmatchedRepo.AddAsync(unmatched);
                         }
                     }
 

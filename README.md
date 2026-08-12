@@ -50,7 +50,7 @@ PharmacyProject.sln
 │   │   ├── User.cs ✅
 │   │   └── UnmatchedPharmacy.cs ✅
 │   └── Enums/
-│       ├── InsuranceType.cs ✅
+│       ├── InsuranceCompanyEnum.cs ✅
 │       └── UserRole.cs ✅
 │
 ├── 2. Application Katmanı
@@ -60,12 +60,14 @@ PharmacyProject.sln
 │   │   │   ├── LoginDto.cs ✅
 │   │   │   └── TokenDto.cs ✅
 │   │   ├── External/
+│   │   │   ├── ScrapedPharmacyDto.cs ✅
 │   │   │   └── NosyApi/
 │   │   │       ├── NosyApiRecentPharmacyDto.cs ✅
 │   │   │       └── NosyApiOnDutyPharmacyDto.cs ✅
 │   │   └── Pharmacy/
-│   │       ├── PharmacyDto.cs ✅
-│   │       ├── ScrapedPharmacyDto.cs ✅
+│   │       ├── CreatePharmacyDto.cs ✅
+│   │       ├── PharmacyResponseDto.cs ✅
+│   │       ├── UpdatePharmacyDto.cs ✅
 │   │       └── ManualMatchRequestDto.cs ✅
 │   ├── Interfaces/
 │   │   ├── Repositories/
@@ -109,9 +111,10 @@ PharmacyProject.sln
 │   │       ├── InsuranceRepository.cs ✅
 │   │       ├── PharmacyInsuranceRepository.cs ✅
 │   │       ├── UserRepository.cs ✅
-│   │       └── UnmatchedRepository.cs ✅
+│   │       └── UnmatchedPharmacyRepository.cs ✅
 │   ├── ExternalServices/
 │   │   ├── AllianzScraperService.cs
+│   │   ├── NoisyApiService.cs
 │   │   ├── [Diğer Servisler]
 │   │   └── OnDutyPharmacyApiService.cs
 │   ├── Security/
