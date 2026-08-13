@@ -6,6 +6,7 @@
         public string? PhoneNumber { get; set; }
         public string Address { get; set; } = string.Empty;
         public string? DistrictName { get; set; }
+        public string? CityName { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string InsuranceCompanyName { get; set; } = string.Empty;

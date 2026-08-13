@@ -7,8 +7,11 @@ using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Security;
 using PharmacyProject.Infrastructure.ExternalServices;
+using PharmacyProject.Infrastructure.ExternalServices.Scrapers;
+using PharmacyProject.Infrastructure.ExternalServices.ScraperServices;
 using PharmacyProject.Infrastructure.Persistence.Context;
 using PharmacyProject.Infrastructure.Persistence.Repositories;
+using PharmacyProject.Infrastructure.Scrapers;
 using PharmacyProject.Infrastructure.Security;
 
 namespace PharmacyProject.Infrastructure;
@@ -38,6 +41,14 @@ public static class DependencyInjection
 
         // 3. Dış API'ler
         services.AddHttpClient<INosyApiService, NosyApiService>();
+        services.AddScoped<IInsuranceScraperService, AllianzScraperService>();
+        services.AddScoped<IInsuranceScraperService, TurkiyeSigortaScraperService>();
+        services.AddScoped<IInsuranceScraperService, MapfreScraperService>();
+        services.AddScoped<IInsuranceScraperService, EurekoScraperService>();
+        services.AddScoped<IInsuranceScraperService, BupaAcibademScraperService>();
+        services.AddScoped<IInsuranceScraperService, AxaScraperService>();
+        services.AddScoped<IInsuranceScraperService, AnadoluScraperService>();
+        services.AddScoped<IInsuranceScraperService, AkSigortaScraperService>();
 
         // 4. Güvenlik Altyapısı
         services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -52,6 +63,8 @@ public static class DependencyInjection
                 options.UseNpgsqlConnection(connectionString)));
 
         services.AddHangfireServer();
+
+
 
         return services;
     }

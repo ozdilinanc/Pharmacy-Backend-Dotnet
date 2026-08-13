@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PharmacyProject.Application.Interfaces.External;
+using PharmacyProject.Infrastructure.ExternalServices.ScraperServices;
 using System.Text;
 
 namespace PharmacyProject.Presentation;
@@ -69,6 +71,10 @@ public static class DependencyInjection
                 }
             });
         });
+
+        // 4. Scrapper Ayarları
+        services.AddScoped<IInsuranceScraperService, AllianzScraperService>();
+        services.AddScoped<IInsuranceScraperService, TurkiyeSigortaScraperService>();
 
         return services;
     }

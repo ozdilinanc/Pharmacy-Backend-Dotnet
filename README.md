@@ -85,18 +85,20 @@ PharmacyProject.sln
 │   │   │   ├── ITokenService.cs ✅
 │   │   │   └── IPasswordHasher.cs ✅
 │   │   ├── External/
-│   │   │   ├── IInsuranceScraperService.cs
-│   │   │   ├── INoisyApiService.cs ✅
-│   │   │   └── IOnDutyApiService.cs
+│   │   │   ├── IInsuranceScraperService.cs ✅
+│   │   │   └── INoisyApiService.cs ✅
 │   │   └── Services/
 │   │       ├── IAuthService.cs ✅
 │   │       ├── IPharmacyService.cs ✅
 │   │       └── ICacheService.cs
 │   ├── Services/
-│   │   ├── PharmacyMatchingService.cs
+│   │   ├── PharmacyMatchingService.cs ✅
 │   │   ├── AuthService.cs ✅
 │   │   ├── PharmacyService.cs ✅
 │   │   └── AdminManualMatchService.cs
+│   ├── Helpers/
+│   │   ├── TextHelper.cs ✅
+│   │   └── GeoHelper.cs ✅
 │   └── DependencyInjection.cs
 │
 ├── 3. Infrastructure Katmanı
@@ -115,10 +117,16 @@ PharmacyProject.sln
 │   │       ├── UserRepository.cs ✅
 │   │       └── UnmatchedPharmacyRepository.cs ✅
 │   ├── ExternalServices/
-│   │   ├── AllianzScraperService.cs
-│   │   ├── NoisyApiService.cs
-│   │   ├── [Diğer Servisler]
-│   │   └── OnDutyPharmacyApiService.cs
+│   │   ├── NoisyApiService.cs ✅
+│   │   └── ScraperServices/
+│   │       ├── AksigortaScraperService.cs ✅
+│   │       ├── AllianzScraperService.cs ✅
+│   │       ├── AnadoluSigortaScraperService.cs ✅
+│   │       ├── AxaSigortaScraperService.cs ✅
+│   │       ├── BupaAcibademSigortaScraperService.cs ✅
+│   │       ├── EurekoSigortaScraperService.cs ✅
+│   │       ├── MapfreSigortaScraperService.cs ✅
+│   │       └── TurkiyeSigortaScraperService.cs ✅
 │   ├── Security/
 │   │   ├── PasswordHasher.cs ✅
 │   │   └── TokenService.cs ✅
