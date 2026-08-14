@@ -4,14 +4,12 @@ using PharmacyProject.Application.Helpers;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Core.Entities;
 using PharmacyProject.Core.Enums;
+using PharmacyProject.Application.Interfaces.Services;
 
 namespace PharmacyProject.Application.Services
 {
 
-    public interface IPharmacyMatchingService
-    {
-        Task MatchAndProcessAsync(List<ScrapedPharmacyDto> scrapedPharmacies);
-    }
+
 
     public class PharmacyMatchingService : IPharmacyMatchingService
     {

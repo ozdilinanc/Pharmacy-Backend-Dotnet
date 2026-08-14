@@ -38,7 +38,7 @@ namespace PharmacyProject.Infrastructure.Workers
                     {
                         _logger.LogInformation("{Insurance} kazıma tamamlandı. Çekilen Veri: {Count}. Eşleştirme motoruna gönderiliyor...", scraper.InsuranceName, scrapedData.Count);
 
-                        var matchingService = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Services.IPharmacyMatchingService>();
+                        var matchingService = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Interfaces.Services.IPharmacyMatchingService>();
                         await matchingService.MatchAndProcessAsync(scrapedData);
 
                         _logger.LogInformation("{Insurance} eşleştirme ve veritabanı kayıt işlemi başarıyla bitti!", scraper.InsuranceName);
