@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using PharmacyProject.Application;
 using PharmacyProject.Infrastructure;
 using PharmacyProject.Infrastructure.Persistence;
@@ -13,6 +13,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddPresentationServices(builder.Configuration);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -29,6 +39,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS Middleware Authentication'dan ÖNCE eklenmeli!
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
