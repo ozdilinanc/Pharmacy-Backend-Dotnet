@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { Search, Link, Trash2, X, AlertCircle } from 'lucide-react';
+import { Search, Link, Trash2, X, AlertCircle, Phone } from 'lucide-react';
 import api, { getUnmatchedPharmacies, getPharmacies, matchPharmacy, deleteUnmatchedPharmacy } from './api';
 import './App.css';
 
@@ -7,11 +7,9 @@ function App() {
   const [unmatched, setUnmatched] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUnmatched, setSelectedUnmatched] = useState(null);
   
-  // Search State
   const [searchQuery, setSearchQuery] = useState('');
   const [realPharmacies, setRealPharmacies] = useState([]);
   const [filteredPharmacies, setFilteredPharmacies] = useState([]);
@@ -51,14 +49,14 @@ function App() {
     const lowerQuery = searchQuery.toLowerCase();
     const filtered = realPharmacies.filter(p => 
       (p.name && p.name.toLowerCase().includes(lowerQuery)) || 
-      (p.districtName && p.districtName.toLowerCase().includes(lowerQuery))
+      (p.districtName && p.districtName.toLowerCase().includes(lowerQuery)) ||
+      (p.phoneNumber && p.phoneNumber.includes(lowerQuery))
     );
     setFilteredPharmacies(filtered.slice(0, 15));
   }, [searchQuery, realPharmacies]);
 
   const handleOpenMatchModal = (pharmacy) => {
     setSelectedUnmatched(pharmacy);
-    // Eczane ismindeki ' Eczanesi' kısmını silerek sadece ana ismi aratmak daha mantıklı
     let cleanName = (pharmacy.scrapedName || '').replace(/eczan.*/i, '').trim();
     setSearchQuery(cleanName);
     setIsModalOpen(true);
@@ -73,28 +71,27 @@ function App() {
   const handleMatch = async (realPharmacyId) => {
     try {
       await matchPharmacy(selectedUnmatched.id, realPharmacyId);
-      alert("Başarıyla eşleştirildi!");
+      alert("Basariyla eslestirildi!");
       handleCloseModal();
-      fetchUnmatched(); // Refresh list
+      fetchUnmatched();
     } catch (error) {
-      alert("Eşleştirme sırasında hata oluştu.");
+      alert("Eslestirme sirasinda hata olustu.");
       console.error(error);
     }
   };
   
   const handleDelete = async (id) => {
-    if (!window.confirm("Bu karantina kaydını silmek istediğinize emin misiniz?")) return;
+    if (!window.confirm("Bu karantina kaydini silmek istediginize emin misiniz?")) return;
     
     try {
       await deleteUnmatchedPharmacy(id);
       fetchUnmatched();
     } catch (error) {
-      alert("Silme sırasında hata oluştu.");
+      alert("Silme sirasinda hata olustu.");
       console.error(error);
     }
   };
   
-  // InsuranceEnum'dan gelen string'i (veya int'i) doğru isme çevirir
   const getInsuranceName = (val) => {
     if (!val) return "Bilinmiyor";
     
@@ -106,15 +103,7 @@ function App() {
       5: "Bupa Acıbadem",
       6: "Axa Sigorta",
       7: "Anadolu Sigorta",
-      8: "Aksigorta",
-      "Allianz": "Allianz",
-      "TurkiyeSigorta": "Türkiye Sigorta",
-      "MapfreSigorta": "Mapfre Sigorta",
-      "EurekoSigorta": "Eureko Sigorta",
-      "BupaAcibademSigorta": "Bupa Acıbadem",
-      "AxaSigorta": "Axa Sigorta",
-      "AnadoluSigorta": "Anadolu Sigorta",
-      "Aksigorta": "Aksigorta"
+      8: "Aksigorta"
     };
     return insurances[val] || val;
   };
@@ -139,7 +128,7 @@ function App() {
             <thead>
               <tr>
                 <th>Kazınan İsim</th>
-                <th>Adres</th>
+                <th>Adres & Telefon</th>
                 <th>Kaynak Sigorta</th>
                 <th>Tarih</th>
                 <th>Aksiyonlar</th>
@@ -149,7 +138,14 @@ function App() {
               {unmatched.map(item => (
                 <tr key={item.id}>
                   <td><strong>{item.scrapedName}</strong></td>
-                  <td>{item.scrapedAddress || '-'}</td>
+                  <td>
+                    <div style={{ fontSize: '0.9rem' }}>{item.scrapedAddress || '-'}</div>
+                    {item.scrapedPhoneNumber && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--primary-color)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Phone size={12} /> {item.scrapedPhoneNumber}
+                      </div>
+                    )}
+                  </td>
                   <td>
                     {item.sourceInsurance || item.dataSource ? (
                       <span className="badge insurance">{getInsuranceName(item.sourceInsurance) || item.dataSource}</span>
@@ -193,6 +189,11 @@ function App() {
               <div style={{ padding: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px' }}>
                 <strong style={{ color: '#60a5fa' }}>{selectedUnmatched?.scrapedName}</strong>
                 <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.8 }}>{selectedUnmatched?.scrapedAddress}</div>
+                {selectedUnmatched?.scrapedPhoneNumber && (
+                  <div style={{ fontSize: '0.85rem', color: 'var(--primary-color)', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
+                    <Phone size={14} /> {selectedUnmatched.scrapedPhoneNumber}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -200,7 +201,7 @@ function App() {
               <Search className="search-icon" size={20} />
               <input 
                 type="text" 
-                placeholder="Gerçek eczanelerde ara (örn: Şifa veya İlçe adı)..." 
+                placeholder="Gerçek eczanelerde ara (örn: Şifa veya İlçe veya Telefon)..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 autoFocus
@@ -214,8 +215,20 @@ function App() {
                 filteredPharmacies.map(real => (
                   <div key={real.id} className="pharmacy-card">
                     <div className="pharmacy-info">
-                      <h3>{real.name}</h3>
-                      <p>{real.districtName || 'Bilinmiyor'} - {real.address}</p>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3>{real.name}</h3>
+                        {real.districtName && (
+                          <span style={{ fontSize: '0.75rem', padding: '2px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '12px' }}>
+                            {real.districtName}
+                          </span>
+                        )}
+                      </div>
+                      <p style={{ marginTop: '4px' }}>{real.address}</p>
+                      {real.phoneNumber && (
+                        <div style={{ fontSize: '0.85rem', color: 'var(--primary-color)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold' }}>
+                          <Phone size={14} /> {real.phoneNumber}
+                        </div>
+                      )}
                     </div>
                     <button className="btn-primary" onClick={() => handleMatch(real.id)}>
                       Seç

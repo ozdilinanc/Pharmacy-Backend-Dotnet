@@ -5,8 +5,9 @@ namespace PharmacyProject.Application.Interfaces.Services
 {
     public interface IAdminManualMatchService
     {
-        Task<IEnumerable<UnmatchedPharmacy>> GetUnmatchedPharmaciesAsync();
+        Task<IEnumerable<UnmatchedPharmacyDto>> GetUnmatchedPharmaciesAsync();
         Task MatchPharmacyAsync(ManualMatchRequestDto matchRequestDto);
         Task DeleteUnmatchedPharmacyAsync(int unmatchedPharmacyId);
+        Task<IEnumerable<PharmacyResponseDto>> GetSuggestionsAsync(int unmatchedPharmacyId);
     }
 }

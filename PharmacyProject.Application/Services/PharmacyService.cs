@@ -27,7 +27,6 @@ namespace PharmacyProject.Application.Services
             };
 
             await _unitOfWork.Pharmacies.AddAsync(newPharmacy);
-
             await _unitOfWork.SaveChangesAsync();
 
             return new PharmacyResponseDto
@@ -47,7 +46,7 @@ namespace PharmacyProject.Application.Services
             var pharmacy = await _unitOfWork.Pharmacies.GetByIdAsync(id);
 
             if (pharmacy == null)
-                throw new KeyNotFoundException("Bu ID'ye sahip eczane bulunamadı!");
+                throw new KeyNotFoundException("Bu ID'ye sahip eczane bulunamadi!");
 
             return new PharmacyResponseDto
             {
@@ -63,7 +62,7 @@ namespace PharmacyProject.Application.Services
 
         public async Task<IEnumerable<PharmacyResponseDto>> GetAllAsync()
         {
-            var pharmacies = await _unitOfWork.Pharmacies.GetAllAsync();
+            var pharmacies = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync();
 
             return pharmacies.Select(p => new PharmacyResponseDto
             {
@@ -73,7 +72,29 @@ namespace PharmacyProject.Application.Services
                 PhoneNumber = p.PhoneNumber,
                 Latitude = p.Latitude,
                 Longitude = p.Longitude,
-                DistrictId = p.DistrictId
+                DistrictId = p.DistrictId,
+                DistrictName = p.District?.Name
+            });
+        }
+        
+        public async Task<IEnumerable<PharmacyResponseDto>> GetByLocationAsync(string citySlug, string? districtSlug = null, bool? isOnDuty = null)
+        {
+            var pharmacies = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync(p => 
+                (string.IsNullOrEmpty(citySlug) || p.District.City.Slug == citySlug) &&
+                (string.IsNullOrEmpty(districtSlug) || p.District.Slug == districtSlug) &&
+                (!isOnDuty.HasValue || p.IsOnDuty == isOnDuty.Value)
+            );
+
+            return pharmacies.Select(p => new PharmacyResponseDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Address = p.Address,
+                PhoneNumber = p.PhoneNumber,
+                Latitude = p.Latitude,
+                Longitude = p.Longitude,
+                DistrictId = p.DistrictId,
+                DistrictName = p.District?.Name
             });
         }
 
@@ -82,7 +103,7 @@ namespace PharmacyProject.Application.Services
             var existingPharmacy = await _unitOfWork.Pharmacies.GetByIdAsync(updatePharmacyDto.Id);
 
             if (existingPharmacy == null)
-                throw new KeyNotFoundException("Güncellenecek eczane bulunamadı!");
+                throw new KeyNotFoundException("Guncellenecek eczane bulunamadi!");
 
             existingPharmacy.Name = updatePharmacyDto.Name;
             existingPharmacy.Address = updatePharmacyDto.Address;
@@ -92,7 +113,6 @@ namespace PharmacyProject.Application.Services
             existingPharmacy.DistrictId = updatePharmacyDto.DistrictId;
 
             _unitOfWork.Pharmacies.Update(existingPharmacy);
-
             await _unitOfWork.SaveChangesAsync();
         }
 
@@ -101,10 +121,9 @@ namespace PharmacyProject.Application.Services
             var pharmacyToDelete = await _unitOfWork.Pharmacies.GetByIdAsync(id);
 
             if (pharmacyToDelete == null)
-                throw new KeyNotFoundException("Silinecek eczane bulunamadı!");
+                throw new KeyNotFoundException("Silinecek eczane bulunamadi!");
 
             _unitOfWork.Pharmacies.Delete(pharmacyToDelete);
-
             await _unitOfWork.SaveChangesAsync();
         }
     }

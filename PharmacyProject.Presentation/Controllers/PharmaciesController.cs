@@ -4,9 +4,6 @@ using PharmacyProject.Application.Interfaces.Services;
 
 namespace PharmacyProject.Presentation.Controllers
 {
-    /// <summary>
-    /// Eczane kayıtlarının eklendiği, listelendiği, güncellendiği ve silindiği yönetim uç noktasıdır.
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class PharmaciesController : ControllerBase
@@ -18,6 +15,14 @@ namespace PharmacyProject.Presentation.Controllers
             _pharmacyService = pharmacyService;
         }
 
+        [HttpGet("{citySlug}/{districtSlug?}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetByLocation(string citySlug, string? districtSlug = null, [FromQuery] bool? isOnDuty = null)
+        {
+            var pharmacies = await _pharmacyService.GetByLocationAsync(citySlug, districtSlug, isOnDuty);
+            return Ok(pharmacies);
+        }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -25,41 +30,46 @@ namespace PharmacyProject.Presentation.Controllers
             return Ok(await _pharmacyService.GetAllAsync());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            return Ok(await _pharmacyService.GetByIdAsync(id));
+            var pharmacy = await _pharmacyService.GetByIdAsync(id);
+            return Ok(pharmacy);
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        // TODO: [Authorize] EKLENECEK
-        public async Task<IActionResult> Create([FromBody] CreatePharmacyDto createDto)
+        public async Task<IActionResult> Create([FromBody] CreatePharmacyDto createPharmacyDto)
         {
-            var createdPharmacy = await _pharmacyService.CreateAsync(createDto);
-
+            var createdPharmacy = await _pharmacyService.CreateAsync(createPharmacyDto);
             return CreatedAtAction(nameof(GetById), new { id = createdPharmacy.Id }, createdPharmacy);
         }
 
-        [HttpPut]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update([FromBody] UpdatePharmacyDto updateDto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePharmacyDto updatePharmacyDto)
         {
-            await _pharmacyService.UpdateAsync(updateDto);
-            return Ok(new { message = "Eczane başarıyla güncellendi" });
+            if (id != updatePharmacyDto.Id)
+            {
+                return BadRequest(new { message = "ID'ler uyuşmuyor!" });
+            }
+
+            await _pharmacyService.UpdateAsync(updatePharmacyDto);
+            return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
             await _pharmacyService.DeleteAsync(id);
-            return Ok(new { message = "Eczane başarıyla silindi" });
+            return NoContent();
         }
     }
 }

@@ -68,17 +68,16 @@ namespace PharmacyProject.Application.Services
 
             foreach (var batch in batches)
             {
-                var targetDistrictIds = new HashSet<int>();
+                var targetCityIds = new HashSet<int>();
                 var targetPhones = new HashSet<string>();
 
-                // Bu batch içindeki district id'leri ve telefon numaralarını bulalım
+                // Bu batch içindeki city id'leri ve telefon numaralarını bulalım
                 foreach (var scraped in batch)
                 {
                     string normCity = TextHelper.NormalizeLocationName(scraped.CityName);
-                    string normDist = TextHelper.NormalizeLocationName(scraped.DistrictName);
-                    if (cityLookup.TryGetValue(normCity, out int cityId) && districtLookup.TryGetValue($"{cityId}_{normDist}", out int distId))
+                    if (cityLookup.TryGetValue(normCity, out int cityId))
                     {
-                        targetDistrictIds.Add(distId);
+                        targetCityIds.Add(cityId);
                     }
                     
                     var normPhone = TextHelper.NormalizePhone(scraped.PhoneNumber);
@@ -88,11 +87,11 @@ namespace PharmacyProject.Application.Services
                     }
                 }
 
-                // Sadece bu batch için gerekli olan eczaneleri veritabanından çek (Optimizasyon)
+                // Sadece bu batch için gerekli olan eczaneleri (Şehre göre) veritabanından çek (Optimizasyon)
                 var dbPharmacies = new List<Pharmacy>();
                 
-                var districtPharmacies = await _pharmacyRepository.FindAsync(p => targetDistrictIds.Contains(p.DistrictId));
-                dbPharmacies.AddRange(districtPharmacies);
+                var cityPharmacies = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => targetCityIds.Contains(p.District.CityId));
+                dbPharmacies.AddRange(cityPharmacies);
                 
                 foreach (var scraped in batch)
                 {
@@ -206,7 +205,9 @@ namespace PharmacyProject.Application.Services
                             DataSource = "Scraper",
                             SourceInsurance = parsedEnum,
                             IsResolved = false,
-                            MatchedPharmacyId = null
+                            MatchedPharmacyId = null,
+                            CityId = scrapedCityId,
+                            DistrictId = scrapedDistrictId
                         };
 
                         await _unmatchedPharmacyRepository.AddAsync(unmatchedPharmacy);

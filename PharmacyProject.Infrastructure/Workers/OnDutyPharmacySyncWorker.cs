@@ -31,6 +31,7 @@ namespace PharmacyProject.Infrastructure.Workers
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var unmatchedRepo = scope.ServiceProvider.GetRequiredService<IUnmatchedPharmacyRepository>();
                     var cityRepo = scope.ServiceProvider.GetRequiredService<ICityRepository>();
+                    var districtRepo = scope.ServiceProvider.GetRequiredService<IDistrictRepository>();
 
                     var currentOnDuties = await pharmacyRepo.GetAllAsync();
                     var activeOnDuties = currentOnDuties.Where(p => p.IsOnDuty).ToList();
@@ -43,6 +44,7 @@ namespace PharmacyProject.Infrastructure.Workers
 
                     var allDbPharmacies = await pharmacyRepo.GetAllAsync();
                     var allCities = await cityRepo.GetAllAsync();
+                    var allDistricts = await districtRepo.GetAllAsync();
 
                     foreach (var city in allCities)
                     {
@@ -74,13 +76,19 @@ namespace PharmacyProject.Infrastructure.Workers
                             {
                                 _logger.LogWarning($"Eşleşme bulunamadı, tabloya ekleniyor! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
 
+                                var matchedDistrict = allDistricts.FirstOrDefault(d => 
+                                    d.CityId == city.Id && 
+                                    PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(d.Name) == PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(apiPharmacy.District ?? ""));
+
                                 var unmatched = new UnmatchedPharmacy
                                 {
                                     ScrapedName = apiPharmacy.PharmacyName ?? "Bilinmiyor",
                                     ScrapedPhoneNumber = apiPharmacy.Phone,
                                     ScrapedAddress = $"{apiPharmacy.Address} - İlçe: {apiPharmacy.District}",
                                     SourceInsurance = null,
-                                    DataSource = "NosyAPI (Nöbetçi)"
+                                    DataSource = "NosyAPI (Nöbetçi)",
+                                    CityId = city.Id,
+                                    DistrictId = matchedDistrict?.Id
                                 };
 
                                 await unmatchedRepo.AddAsync(unmatched);

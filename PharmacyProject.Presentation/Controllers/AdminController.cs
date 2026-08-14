@@ -43,5 +43,19 @@ namespace PharmacyProject.Presentation.Controllers
             await _adminManualMatchService.DeleteUnmatchedPharmacyAsync(id);
             return Ok(new { Message = "Karantina kaydı silindi." });
         }
+
+        [HttpGet("unmatched/{id}/suggestions")]
+        public async Task<IActionResult> GetSuggestions(int id)
+        {
+            try
+            {
+                var suggestions = await _adminManualMatchService.GetSuggestionsAsync(id);
+                return Ok(suggestions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
     }
 }
