@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Search, Link, Trash2, X, AlertCircle } from 'lucide-react';
 import api, { getUnmatchedPharmacies, getPharmacies, matchPharmacy, deleteUnmatchedPharmacy } from './api';
 import './App.css';
@@ -43,22 +43,24 @@ function App() {
   };
   
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (!searchQuery || searchQuery.trim() === '') {
       setFilteredPharmacies([]);
       return;
     }
     
     const lowerQuery = searchQuery.toLowerCase();
     const filtered = realPharmacies.filter(p => 
-      p.name.toLowerCase().includes(lowerQuery) || 
+      (p.name && p.name.toLowerCase().includes(lowerQuery)) || 
       (p.districtName && p.districtName.toLowerCase().includes(lowerQuery))
     );
-    setFilteredPharmacies(filtered.slice(0, 10)); // Top 10 matches
+    setFilteredPharmacies(filtered.slice(0, 15));
   }, [searchQuery, realPharmacies]);
 
   const handleOpenMatchModal = (pharmacy) => {
     setSelectedUnmatched(pharmacy);
-    setSearchQuery(pharmacy.name); // Pre-fill with scraped name
+    // Eczane ismindeki ' Eczanesi' kısmını silerek sadece ana ismi aratmak daha mantıklı
+    let cleanName = (pharmacy.scrapedName || '').replace(/eczan.*/i, '').trim();
+    setSearchQuery(cleanName);
     setIsModalOpen(true);
   };
   
@@ -92,16 +94,29 @@ function App() {
     }
   };
   
-  // Helper for Insurance Enum Mapping
-  const getInsuranceName = (id) => {
+  // InsuranceEnum'dan gelen string'i (veya int'i) doğru isme çevirir
+  const getInsuranceName = (val) => {
+    if (!val) return "Bilinmiyor";
+    
     const insurances = {
-      1: "SGK",
-      2: "Allianz",
-      3: "Acıbadem",
-      4: "Anadolu",
-      5: "Mapfre"
+      1: "Allianz",
+      2: "Türkiye Sigorta",
+      3: "Mapfre Sigorta",
+      4: "Eureko Sigorta",
+      5: "Bupa Acıbadem",
+      6: "Axa Sigorta",
+      7: "Anadolu Sigorta",
+      8: "Aksigorta",
+      "Allianz": "Allianz",
+      "TurkiyeSigorta": "Türkiye Sigorta",
+      "MapfreSigorta": "Mapfre Sigorta",
+      "EurekoSigorta": "Eureko Sigorta",
+      "BupaAcibademSigorta": "Bupa Acıbadem",
+      "AxaSigorta": "Axa Sigorta",
+      "AnadoluSigorta": "Anadolu Sigorta",
+      "Aksigorta": "Aksigorta"
     };
-    return insurances[id] || "Bilinmiyor";
+    return insurances[val] || val;
   };
 
   return (
@@ -125,7 +140,7 @@ function App() {
               <tr>
                 <th>Kazınan İsim</th>
                 <th>Adres</th>
-                <th>Kaynak</th>
+                <th>Kaynak Sigorta</th>
                 <th>Tarih</th>
                 <th>Aksiyonlar</th>
               </tr>
@@ -133,11 +148,11 @@ function App() {
             <tbody>
               {unmatched.map(item => (
                 <tr key={item.id}>
-                  <td><strong>{item.name}</strong></td>
-                  <td>{item.address || '-'}</td>
+                  <td><strong>{item.scrapedName}</strong></td>
+                  <td>{item.scrapedAddress || '-'}</td>
                   <td>
-                    {item.sourceInsurance ? (
-                      <span className="badge insurance">{getInsuranceName(item.sourceInsurance)}</span>
+                    {item.sourceInsurance || item.dataSource ? (
+                      <span className="badge insurance">{getInsuranceName(item.sourceInsurance) || item.dataSource}</span>
                     ) : (
                       <span className="badge">Web</span>
                     )}
@@ -176,8 +191,8 @@ function App() {
                 Aranan (Karantinadaki) Eczane:
               </p>
               <div style={{ padding: '12px', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '8px' }}>
-                <strong style={{ color: '#60a5fa' }}>{selectedUnmatched?.name}</strong>
-                <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.8 }}>{selectedUnmatched?.address}</div>
+                <strong style={{ color: '#60a5fa' }}>{selectedUnmatched?.scrapedName}</strong>
+                <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.8 }}>{selectedUnmatched?.scrapedAddress}</div>
               </div>
             </div>
 
@@ -185,7 +200,7 @@ function App() {
               <Search className="search-icon" size={20} />
               <input 
                 type="text" 
-                placeholder="Gerçek eczanelerde ara (örn: Şifa Eczanesi)..." 
+                placeholder="Gerçek eczanelerde ara (örn: Şifa veya İlçe adı)..." 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 autoFocus
