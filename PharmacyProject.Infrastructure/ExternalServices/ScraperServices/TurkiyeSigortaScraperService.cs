@@ -39,12 +39,18 @@ namespace PharmacyProject.Infrastructure.ExternalServices.ScraperServices
                         await Task.Delay(delay);
 
                         string rawData = await FetchTurkiyeSigortaPharmaciesAsync(cityCode);
+
+                        // Eğer 404 aldıysak ve boş döndüysek, boş liste gönder
+                        if (string.IsNullOrEmpty(rawData))
+                        {
+                            return new List<ScrapedPharmacyDto>();
+                        }
+
                         return ParseRscToPharmacies(rawData);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex, "Türkiye Sigorta: {CityCode} plaka kodlu il çekilirken hata oluştu. Hata: {Message}", cityCode, ex.Message);
-
                         return new List<ScrapedPharmacyDto>();
                     }
                     finally
@@ -80,7 +86,11 @@ namespace PharmacyProject.Infrastructure.ExternalServices.ScraperServices
             request.Content = new StringContent(jsonBody, Encoding.UTF8, "text/plain");
 
             var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return string.Empty;
+            }
 
             return await response.Content.ReadAsStringAsync();
         }

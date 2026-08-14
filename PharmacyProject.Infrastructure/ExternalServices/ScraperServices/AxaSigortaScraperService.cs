@@ -7,11 +7,11 @@ using System.Text.Json;
 
 namespace PharmacyProject.Infrastructure.ExternalServices.ScraperServices
 {
-    public class AxaScraperService : IInsuranceScraperService
+    public class AxaSigortaScraperService : IInsuranceScraperService
     {
-        private readonly ILogger<AxaScraperService> _logger;
+        private readonly ILogger<AxaSigortaScraperService> _logger;
 
-        public AxaScraperService(ILogger<AxaScraperService> logger)
+        public AxaSigortaScraperService(ILogger<AxaSigortaScraperService> logger)
         {
             _logger = logger;
         }

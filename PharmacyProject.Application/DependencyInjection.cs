@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using PharmacyProject.Application.Interfaces.Services;
 using PharmacyProject.Application.Services;
 
@@ -11,6 +11,7 @@ public static class DependencyInjection
         // Application'ın Beyni: İş Kuralları (Servisler)
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPharmacyService, PharmacyService>();
+        services.AddScoped<IPharmacyMatchingService, PharmacyMatchingService>();
 
         return services;
     }

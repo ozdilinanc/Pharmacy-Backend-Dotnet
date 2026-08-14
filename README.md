@@ -1,10 +1,10 @@
 # PharmacyProject Backend 🚀
 
-Bu proje, çeşitli sigorta şirketlerinin anlaşmalı kurum verilerini (JSON üzerinden) ve il/ilçe bazlı nöbetçi eczane listelerini (API üzerinden) toplayıp birleştiren bir aracı (aggregator) servistir. Ana amacı, farklı kaynaklardan toplanan bu dağınık verileri kendi veritabanımızda eşleştirip, mobil uygulamamıza temiz ve tek bir API üzerinden sunmaktır.
+Bu proje, çeşitli sigorta şirketlerinin anlaşmalı kurum verilerini (Web Scraping üzerinden) ve il/ilçe bazlı nöbetçi eczane listelerini (NosyAPI üzerinden) toplayıp birleştiren bir aracı (aggregator) servistir. Ana amacı, farklı kaynaklardan toplanan bu dağınık ve standart dışı verileri, **Akıllı Eşleştirme Motoru (Smart Matching Engine)** yardımıyla kendi veritabanımızda tutarlı bir şekilde eşleştirip (telefon, isim benzerliği ve koordinat bazlı), mobil uygulamamıza temiz ve tek bir API üzerinden sunmaktır.
 
 ## 🛠️ Kullanılan Teknolojiler ve Mimari
 
-Bu proje, sürdürülebilirlik ve kodun test edilebilirliği göz önünde bulundurularak **Onion Architecture (Soğan Mimarisi)** baz alınarak geliştirilmiştir.
+Bu proje, sürdürülebilirlik, yüksek performans ve kodun test edilebilirliği göz önünde bulundurularak **Onion Architecture (Soğan Mimarisi)** baz alınarak geliştirilmiştir.
 
 ### 🔹 Temel Teknolojiler
 - **Framework:** .NET 8 (ASP.NET Core Web API)
@@ -18,21 +18,22 @@ Bu proje, sürdürülebilirlik ve kodun test edilebilirliği göz önünde bulun
 - **Migration:** EF Core Code-First
 
 ### 🔹 Performans ve Altyapı
+- **Arka Plan Görevleri (Background Jobs):** Hangfire (Sigorta ve nöbetçi eczane verilerini, API Rate Limit'lerini koruyarak asenkron ve periyodik olarak güncellemek için)
 - **Konteynerizasyon:** Docker & Docker Compose (PostgreSQL ve Redis için)
-- **Önbellekleme:** Redis (Sık sorgulanan eczane verilerini hızlandırmak için)
-- **Arka Plan Görevleri:** Hangfire (Sigorta ve nöbetçi eczane verilerini periyodik olarak güncel tutmak için)
+- **Önbellekleme:** Redis (Sık sorgulanan eczane verilerini hızlandırmak için - Planlanıyor)
+- **Veri İşleme (Batching/Chunking):** On binlerce eczane verisini ve API sonucunu RAM'i şişirmeden (Memory Leak koruması) paketler (Chunk) halinde işleyen bellek dostu mimari.
 
 ### 🔹 Tasarım Desenleri (Design Patterns)
-- **DTO (Data Transfer Object):** Veritabanı modellerini (Entity) doğrudan dışarı açmamak ve API trafiğini optimize etmek için.
-- **Repository Pattern:** Veritabanı işlemlerini merkezileştirmek için (`IGenericRepository`)
-- **Unit of Work Pattern:** İşlemleri tek bir transaction (işlem) bütünlüğü içinde kaydetmek için (`IUnitOfWork`)
-- **Dependency Injection (DI):** Servislerin esnek çalışması için
+- **Repository Pattern:** Veritabanı işlemlerini merkezileştirmek ve soyutlamak için (`IGenericRepository`)
+- **Unit of Work Pattern:** Batch işlemlerini tek bir transaction (işlem) bütünlüğü içinde güvenle kaydetmek için (`IUnitOfWork`)
+- **DTO (Data Transfer Object):** Veritabanı modellerini doğrudan dışarı açmamak ve API trafiğini optimize etmek için.
+- **Dependency Injection (DI):** Servislerin esnek, bağımsız ve test edilebilir şekilde çalışması için.
 
-### 🔹 Güvenlik ve API Standartları
+### 🔹 Güvenlik, Motor ve API Standartları
+- **Akıllı Eşleştirme Motoru:** Metin benzerliği (Levenshtein Distance vs.), Geo-Coordinate (Enlem/Boylam mesafe hesaplama) ve normalize edilmiş telefon numaraları üzerinden dağınık verileri eşleştirme yeteneği.
+- **Hata Yönetimi (Resilience & Fallback):** Eşleşmeyen verilerin kaybolmaması için Karantina (`UnmatchedPharmacy`) tablosu ve merkezi `GlobalExceptionMiddleware`.
 - **Kimlik Doğrulama:** JWT (JSON Web Token) tabanlı yetkilendirme (Planlanıyor)
-- **Konfigürasyon Güvenliği:** .NET User Secrets ve Docker ortam değişkenleri (Şifrelerin gizliliği için)
-- **Entegrasyonlar:** Farklı JSON/API servislerinden veri toplamak için HttpClient ve entegrasyon servisleri.
-- **Veri Güvenliği:** Şifrelerin güvenli bir şekilde saklanması için BCrypt ile otomatik salting ve hashing işlemleri.
+- **Konfigürasyon Güvenliği:** .NET User Secrets ve Docker ortam değişkenleri (API anahtarları ve şifrelerin gizliliği için)
 ---
 
 ## 📂 Proje Mimarisi ve Geliştirme Durumu (✅ Bitenler)
@@ -132,7 +133,7 @@ PharmacyProject.sln
 │   │   └── TokenService.cs ✅
 │   ├── Workers/
 │   │   ├── OnDutyPharmacySyncWorker.cs ✅
-│   │   ├── INSURANCE
+│   │   ├── InsuranceSyncWorker.cs ✅
 │   │   └── RecentPharmacySyncWorker.cs ✅
 │   ├── Caching/
 │   │   └── RedisCacheService.cs

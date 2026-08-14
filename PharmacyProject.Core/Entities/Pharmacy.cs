@@ -8,8 +8,8 @@ namespace PharmacyProject.Core.Entities
         public string Address { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; } = string.Empty;
 
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
         public int DistrictId { get; set; }
         public District District { get; set; } = null!;

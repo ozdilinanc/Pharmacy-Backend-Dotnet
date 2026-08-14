@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Application.Interfaces.Repositories;
@@ -30,6 +30,7 @@ namespace PharmacyProject.Infrastructure.Workers
                     var pharmacyRepo = scope.ServiceProvider.GetRequiredService<IPharmacyRepository>();
                     var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                     var unmatchedRepo = scope.ServiceProvider.GetRequiredService<IUnmatchedPharmacyRepository>();
+                    var cityRepo = scope.ServiceProvider.GetRequiredService<ICityRepository>();
 
                     var currentOnDuties = await pharmacyRepo.GetAllAsync();
                     var activeOnDuties = currentOnDuties.Where(p => p.IsOnDuty).ToList();
@@ -41,44 +42,53 @@ namespace PharmacyProject.Infrastructure.Workers
                     await uow.SaveChangesAsync();
 
                     var allDbPharmacies = await pharmacyRepo.GetAllAsync();
-                    var apiPharmacies = await nosyApiService.GetOnDutyPharmaciesAsync("ankara");
+                    var allCities = await cityRepo.GetAllAsync();
 
-                    foreach (var apiPharmacy in apiPharmacies)
+                    foreach (var city in allCities)
                     {
-                        var normalizedApiPhone = NormalizePhone(apiPharmacy.Phone);
+                        string cityQuery = city.Slug ?? city.Name;
+                        _logger.LogInformation($"Hangfire: {city.Name} ili için nöbetçi eczaneler çekiliyor...");
+                        
+                        var apiPharmacies = await nosyApiService.GetOnDutyPharmaciesAsync(cityQuery);
 
-                        var matchedDbPharmacy = allDbPharmacies.FirstOrDefault(dbP => NormalizePhone(dbP.PhoneNumber) == normalizedApiPhone);
-
-                        if (matchedDbPharmacy == null)
+                        foreach (var apiPharmacy in apiPharmacies)
                         {
-                            var normalizedApiName = NormalizeName(apiPharmacy.PharmacyName);
-                            matchedDbPharmacy = allDbPharmacies.FirstOrDefault(dbP =>
-                                NormalizeName(dbP.Name) == normalizedApiName &&
-                                dbP.District?.Name.ToLower() == apiPharmacy.District?.ToLower());
-                        }
+                            var normalizedApiPhone = PharmacyProject.Application.Helpers.TextHelper.NormalizePhone(apiPharmacy.Phone);
 
-                        if (matchedDbPharmacy != null)
-                        {
-                            matchedDbPharmacy.IsOnDuty = true;
-                            pharmacyRepo.Update(matchedDbPharmacy);
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"Eşleşme bulunamadı, tabloya ekleniyor! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
+                            var matchedDbPharmacy = allDbPharmacies.FirstOrDefault(dbP => PharmacyProject.Application.Helpers.TextHelper.NormalizePhone(dbP.PhoneNumber) == normalizedApiPhone);
 
-                            var unmatched = new UnmatchedPharmacy
+                            if (matchedDbPharmacy == null)
                             {
-                                ScrapedName = apiPharmacy.PharmacyName ?? "Bilinmiyor",
-                                ScrapedPhoneNumber = apiPharmacy.Phone,
-                                ScrapedAddress = $"{apiPharmacy.Address} - İlçe: {apiPharmacy.District}",
+                                var normalizedApiName = PharmacyProject.Application.Helpers.TextHelper.NormalizeName(apiPharmacy.PharmacyName);
+                                matchedDbPharmacy = allDbPharmacies.FirstOrDefault(dbP =>
+                                    PharmacyProject.Application.Helpers.TextHelper.NormalizeName(dbP.Name) == normalizedApiName &&
+                                    dbP.District?.Name.ToLower() == apiPharmacy.District?.ToLower());
+                            }
 
-                                SourceInsurance = null,
+                            if (matchedDbPharmacy != null)
+                            {
+                                matchedDbPharmacy.IsOnDuty = true;
+                                pharmacyRepo.Update(matchedDbPharmacy);
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Eşleşme bulunamadı, tabloya ekleniyor! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
 
-                                DataSource = "NosyAPI (Nöbetçi)"
-                            };
+                                var unmatched = new UnmatchedPharmacy
+                                {
+                                    ScrapedName = apiPharmacy.PharmacyName ?? "Bilinmiyor",
+                                    ScrapedPhoneNumber = apiPharmacy.Phone,
+                                    ScrapedAddress = $"{apiPharmacy.Address} - İlçe: {apiPharmacy.District}",
+                                    SourceInsurance = null,
+                                    DataSource = "NosyAPI (Nöbetçi)"
+                                };
 
-                            await unmatchedRepo.AddAsync(unmatched);
+                                await unmatchedRepo.AddAsync(unmatched);
+                            }
                         }
+                        
+                        // Her il sonrası rate limit'i çok zorlamamak için ufak bir bekleme (Opsiyonel, ancak faydalı)
+                        await Task.Delay(1000); 
                     }
 
                     await uow.SaveChangesAsync();
@@ -90,23 +100,6 @@ namespace PharmacyProject.Infrastructure.Workers
                 _logger.LogError(ex.Message);
                 throw;
             }
-        }
-
-        private string NormalizePhone(string? phone)
-        {
-            if (string.IsNullOrWhiteSpace(phone)) return string.Empty;
-            var digitsOnly = new string(phone.Where(char.IsDigit).ToArray());
-            return digitsOnly.StartsWith("0") ? digitsOnly.Substring(1) : digitsOnly;
-        }
-
-        private string NormalizeName(string? name)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
-            return name.ToLower(new CultureInfo("tr-TR"))
-                       .Replace("eczanesi", "")
-                       .Replace("ecz", "")
-                       .Replace(" ", "")
-                       .Trim();
         }
     }
 }

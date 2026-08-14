@@ -8,9 +8,9 @@ using System.Text.Json;
 
 namespace PharmacyProject.Infrastructure.ExternalServices.ScraperServices
 {
-    public class AnadoluScraperService : IInsuranceScraperService
+    public class AnadoluSigortaScraperService : IInsuranceScraperService
     {
-        private readonly ILogger<AnadoluScraperService> _logger;
+        private readonly ILogger<AnadoluSigortaScraperService> _logger;
 
         private readonly string[] _cities = new[]
         {
@@ -24,7 +24,7 @@ namespace PharmacyProject.Infrastructure.ExternalServices.ScraperServices
             "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
         };
 
-        public AnadoluScraperService(ILogger<AnadoluScraperService> logger)
+        public AnadoluSigortaScraperService(ILogger<AnadoluSigortaScraperService> logger)
         {
             _logger = logger;
         }

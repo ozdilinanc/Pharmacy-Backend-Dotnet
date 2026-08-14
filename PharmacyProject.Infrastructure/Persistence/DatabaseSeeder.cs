@@ -1,4 +1,4 @@
-﻿using PharmacyProject.Core.Entities;
+using PharmacyProject.Core.Entities;
 using PharmacyProject.Infrastructure.Persistence.Context;
 using System.Text.Json;
 
@@ -66,6 +66,47 @@ namespace PharmacyProject.Infrastructure.Persistence
                 {
                     var batch = pharmacies.Skip(i).Take(batchSize).ToList();
                     await context.Pharmacies.AddRangeAsync(batch);
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+
+        public static async Task SeedInsuranceCompaniesAsync(AppDbContext context)
+        {
+            if (!context.InsuranceCompanies.Any())
+            {
+                var defaultInsurances = new List<InsuranceCompany>
+                {
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.Aksigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.Allianz.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.AnadoluSigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.AxaSigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.BupaAcibademSigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.EurekoSigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.MapfreSigorta.ToString() },
+                    new InsuranceCompany { Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.TurkiyeSigorta.ToString() }
+                };
+
+                await context.InsuranceCompanies.AddRangeAsync(defaultInsurances);
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                // Mevcut yanlış isimlendirmeleri (Axa, Mapfre vb.) Enum ile uyumlu hale getirmek için düzeltme yaması
+                var existingInsurances = context.InsuranceCompanies.ToList();
+                bool needsUpdate = false;
+                foreach (var ins in existingInsurances)
+                {
+                    if (ins.Name == "AkSigorta") { ins.Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.Aksigorta.ToString(); needsUpdate = true; }
+                    else if (ins.Name == "Axa") { ins.Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.AxaSigorta.ToString(); needsUpdate = true; }
+                    else if (ins.Name == "BupaAcibadem") { ins.Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.BupaAcibademSigorta.ToString(); needsUpdate = true; }
+                    else if (ins.Name == "Eureko") { ins.Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.EurekoSigorta.ToString(); needsUpdate = true; }
+                    else if (ins.Name == "Mapfre") { ins.Name = PharmacyProject.Core.Enums.InsuranceCompanyEnum.MapfreSigorta.ToString(); needsUpdate = true; }
+                }
+
+                if (needsUpdate)
+                {
+                    context.InsuranceCompanies.UpdateRange(existingInsurances);
                     await context.SaveChangesAsync();
                 }
             }

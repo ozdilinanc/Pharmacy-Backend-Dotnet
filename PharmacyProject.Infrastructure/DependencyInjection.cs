@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,8 +11,8 @@ using PharmacyProject.Infrastructure.ExternalServices.Scrapers;
 using PharmacyProject.Infrastructure.ExternalServices.ScraperServices;
 using PharmacyProject.Infrastructure.Persistence.Context;
 using PharmacyProject.Infrastructure.Persistence.Repositories;
-using PharmacyProject.Infrastructure.Scrapers;
 using PharmacyProject.Infrastructure.Security;
+using PharmacyProject.Infrastructure.Workers;
 
 namespace PharmacyProject.Infrastructure;
 
@@ -43,11 +43,11 @@ public static class DependencyInjection
         services.AddHttpClient<INosyApiService, NosyApiService>();
         services.AddScoped<IInsuranceScraperService, AllianzScraperService>();
         services.AddScoped<IInsuranceScraperService, TurkiyeSigortaScraperService>();
-        services.AddScoped<IInsuranceScraperService, MapfreScraperService>();
-        services.AddScoped<IInsuranceScraperService, EurekoScraperService>();
-        services.AddScoped<IInsuranceScraperService, BupaAcibademScraperService>();
-        services.AddScoped<IInsuranceScraperService, AxaScraperService>();
-        services.AddScoped<IInsuranceScraperService, AnadoluScraperService>();
+        services.AddScoped<IInsuranceScraperService, MapfreSigortaScraperService>();
+        services.AddScoped<IInsuranceScraperService, EurekoSigortaScraperService>();
+        services.AddScoped<IInsuranceScraperService, BupaAcibademSigortaScraperService>();
+        services.AddScoped<IInsuranceScraperService, AxaSigortaScraperService>();
+        services.AddScoped<IInsuranceScraperService, AnadoluSigortaScraperService>();
         services.AddScoped<IInsuranceScraperService, AkSigortaScraperService>();
 
         // 4. Güvenlik Altyapısı
@@ -61,8 +61,14 @@ public static class DependencyInjection
             .UseRecommendedSerializerSettings()
             .UsePostgreSqlStorage(options =>
                 options.UseNpgsqlConnection(connectionString)));
+        services.AddScoped<OnDutyPharmacySyncWorker>();
+        services.AddScoped<RecentPharmacySyncWorker>();
+        services.AddTransient<InsuranceSyncWorker>();
+
 
         services.AddHangfireServer();
+
+
 
 
 
