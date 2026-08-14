@@ -96,7 +96,7 @@ PharmacyProject.sln
 │   │   ├── PharmacyMatchingService.cs ✅
 │   │   ├── AuthService.cs ✅
 │   │   ├── PharmacyService.cs ✅
-│   │   └── AdminManualMatchService.cs
+│   │   └── AdminManualMatchService.cs ✅
 │   ├── Helpers/
 │   │   ├── TextHelper.cs ✅
 │   │   └── GeoHelper.cs ✅
@@ -145,7 +145,7 @@ PharmacyProject.sln
     ├── Controllers/
     │   ├── AuthController.cs ✅
     │   ├── PharmaciesController.cs ✅
-    │   └── AdminController.cs
+    │   └── AdminController.cs ✅
     ├── Middleware/
     │   └── GlobalExceptionMiddleware.cs ✅
     ├── ililce.json
