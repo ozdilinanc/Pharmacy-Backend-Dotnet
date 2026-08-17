@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.Services;
 
@@ -6,6 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class PharmaciesController : ControllerBase
     {
         private readonly IPharmacyService _pharmacyService;
@@ -15,11 +17,12 @@ namespace PharmacyProject.Presentation.Controllers
             _pharmacyService = pharmacyService;
         }
 
+        [Authorize]
         [HttpGet("{citySlug}/{districtSlug?}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetByLocation(string citySlug, string? districtSlug = null, [FromQuery] bool? isOnDuty = null)
+        public async Task<IActionResult> GetByLocation(string citySlug, string? districtSlug = null, [FromQuery] bool? isOnDuty = null, [FromQuery] List<int>? insuranceIds = null)
         {
-            var pharmacies = await _pharmacyService.GetByLocationAsync(citySlug, districtSlug, isOnDuty);
+            var pharmacies = await _pharmacyService.GetByLocationAsync(citySlug, districtSlug, isOnDuty, insuranceIds);
             return Ok(pharmacies);
         }
 

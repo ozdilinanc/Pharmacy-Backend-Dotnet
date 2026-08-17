@@ -12,7 +12,7 @@ namespace PharmacyProject.Application.Interfaces.Repositories
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
 
-
+        
         Task<T> AddAsync(T entity);
         Task AddRangeAsync(IEnumerable<T> entities);
 

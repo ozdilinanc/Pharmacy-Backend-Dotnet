@@ -1,4 +1,4 @@
-﻿using PharmacyProject.Application.DTOs.Pharmacy;
+using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Services;
 using PharmacyProject.Core.Entities;
@@ -77,12 +77,13 @@ namespace PharmacyProject.Application.Services
             });
         }
         
-        public async Task<IEnumerable<PharmacyResponseDto>> GetByLocationAsync(string citySlug, string? districtSlug = null, bool? isOnDuty = null)
+        public async Task<IEnumerable<PharmacyResponseDto>> GetByLocationAsync(string citySlug, string? districtSlug = null, bool? isOnDuty = null, List<int>? insuranceIds = null)
         {
             var pharmacies = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync(p => 
                 (string.IsNullOrEmpty(citySlug) || p.District.City.Slug == citySlug) &&
                 (string.IsNullOrEmpty(districtSlug) || p.District.Slug == districtSlug) &&
-                (!isOnDuty.HasValue || p.IsOnDuty == isOnDuty.Value)
+                (!isOnDuty.HasValue || p.IsOnDuty == isOnDuty.Value) &&
+                (insuranceIds == null || !insuranceIds.Any() || p.PharmacyInsurances.Any(pi => insuranceIds.Contains(pi.InsuranceCompanyId)))
             );
 
             return pharmacies.Select(p => new PharmacyResponseDto
@@ -94,7 +95,12 @@ namespace PharmacyProject.Application.Services
                 Latitude = p.Latitude,
                 Longitude = p.Longitude,
                 DistrictId = p.DistrictId,
-                DistrictName = p.District?.Name
+                DistrictName = p.District?.Name,
+                SupportedInsurances = p.PharmacyInsurances.Select(pi => new SupportedInsuranceDto 
+                { 
+                    Id = pi.InsuranceCompany.Id, 
+                    Name = pi.InsuranceCompany.Name 
+                }).ToList()
             });
         }
 
