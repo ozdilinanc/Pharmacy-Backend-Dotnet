@@ -5,6 +5,8 @@ using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Infrastructure.ExternalServices.ScraperServices;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 namespace PharmacyProject.Presentation;
 
@@ -16,7 +18,28 @@ public static class DependencyInjection
         services.AddControllers();
         services.AddEndpointsApiExplorer();
 
-        // 2. Güvenlik (JWT)
+        // 2. Rate Limiter
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? httpContext.Request.Headers.Host.ToString(),
+                    factory: partition => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 100, // Dakikada 100 İstek
+                        QueueLimit = 0,
+                        Window = TimeSpan.FromMinutes(1)
+                    }));
+
+            options.OnRejected = async (context, token) =>
+            {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                await context.HttpContext.Response.WriteAsync("Çok fazla istek attınız. Lütfen daha sonra tekrar deneyin.", token);
+            };
+        });
+
+        // 3. Güvenlik (JWT)
         var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET")
                         ?? configuration["Jwt:Secret"];
 
@@ -40,7 +63,7 @@ public static class DependencyInjection
             };
         });
 
-        // 3. Swagger Ayarları
+        //  4. Swagger Ayarları
         services.AddSwaggerGen(c =>
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pharmacy API", Version = "v1" });
@@ -74,7 +97,7 @@ public static class DependencyInjection
             });
         });
 
-        // 4. Scrapper Ayarları
+        // 5. Scrapper Ayarları
         services.AddScoped<IInsuranceScraperService, AllianzScraperService>();
         services.AddScoped<IInsuranceScraperService, TurkiyeSigortaScraperService>();
 

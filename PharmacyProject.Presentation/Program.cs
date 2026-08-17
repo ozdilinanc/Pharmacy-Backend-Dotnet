@@ -43,6 +43,8 @@ app.UseHttpsRedirection();
 // CORS
 app.UseCors("AllowAll");
 
+app.UseRateLimiter(); // <--- RATE LIMITER EKLENDİ
+
 app.UseAuthentication();
 app.UseAuthorization();
 
