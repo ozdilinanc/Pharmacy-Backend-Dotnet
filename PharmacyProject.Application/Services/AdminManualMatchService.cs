@@ -1,6 +1,7 @@
 using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using PharmacyProject.Core.Entities;
 
 using PharmacyProject.Application.DTOs.Common;
@@ -13,17 +14,20 @@ namespace PharmacyProject.Application.Services
         private readonly IPharmacyRepository _pharmacyRepository;
         private readonly IPharmacyInsuranceRepository _pharmacyInsuranceRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<AdminManualMatchService> _logger;
 
         public AdminManualMatchService(
             IUnmatchedPharmacyRepository unmatchedPharmacyRepository,
             IPharmacyRepository pharmacyRepository,
             IPharmacyInsuranceRepository pharmacyInsuranceRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger<AdminManualMatchService> logger)
         {
             _unmatchedPharmacyRepository = unmatchedPharmacyRepository;
             _pharmacyRepository = pharmacyRepository;
             _pharmacyInsuranceRepository = pharmacyInsuranceRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task<PagedResponse<UnmatchedPharmacyDto>> GetUnmatchedPharmaciesAsync(int pageNumber = 1, int pageSize = 50)
@@ -54,16 +58,14 @@ namespace PharmacyProject.Application.Services
                 throw new Exception("Karantina kaydi bulunamadi veya zaten cozumlenmis.");
             }
 
-            var realPharmacy = await _pharmacyRepository.GetByIdAsync(matchRequestDto.RealPharmacyId); // User defined RealPharmacyId originally!
+            var realPharmacy = await _pharmacyRepository.GetByIdAsync(matchRequestDto.RealPharmacyId);
             if (realPharmacy == null)
             {
                 throw new Exception("Hedef eczane veritabaninda bulunamadi.");
             }
 
-            // Sigortasi varsa eczane ile bagla
             if (unmatched.SourceInsurance.HasValue)
             {
-                // Mevcut bir iliski var mi kontrol et
                 var existingRelation = await _pharmacyInsuranceRepository.FindAsync(pi => 
                     pi.PharmacyId == realPharmacy.Id && 
                     pi.InsuranceCompanyId == (int)unmatched.SourceInsurance.Value);
@@ -78,13 +80,14 @@ namespace PharmacyProject.Application.Services
                 }
             }
 
-            // Unmatched kaydini cozumlendi olarak isaretle
             unmatched.IsResolved = true;
             unmatched.MatchedPharmacyId = realPharmacy.Id;
             unmatched.UpdatedAt = DateTime.UtcNow;
 
             _unmatchedPharmacyRepository.Update(unmatched);
             await _unitOfWork.SaveChangesAsync();
+            
+            _logger.LogInformation("Admin eşleştirmesi yapıldı. Karantina ID: {UnmatchedId} -> Hedef Eczane ID: {RealPharmacyId}", matchRequestDto.UnmatchedPharmacyId, matchRequestDto.RealPharmacyId);
         }
 
         public async Task DeleteUnmatchedPharmacyAsync(int unmatchedPharmacyId)
@@ -94,6 +97,8 @@ namespace PharmacyProject.Application.Services
             {
                 await _unmatchedPharmacyRepository.DeleteByIdAsync(unmatchedPharmacyId);
                 await _unitOfWork.SaveChangesAsync();
+                
+                _logger.LogInformation("Karantinadaki eczane admin tarafından silindi. Karantina ID: {UnmatchedId}, İsim: {ScrapedName}", unmatchedPharmacyId, unmatched.ScrapedName);
             }
         }
 
@@ -125,7 +130,6 @@ namespace PharmacyProject.Application.Services
                 string normalizedDbName = PharmacyProject.Application.Helpers.TextHelper.NormalizeName(p.Name);
                 double score = PharmacyProject.Application.Helpers.TextHelper.CalculateSimilarity(normalizedUnmatchedName, normalizedDbName);
                 
-                // Aynı ilçedeyse bonus puan ekle
                 if (unmatched.DistrictId.HasValue && p.DistrictId == unmatched.DistrictId.Value)
                 {
                     score += 20.0;

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PharmacyProject.Core.Entities;
 
 namespace PharmacyProject.Infrastructure.Persistence.Context
@@ -11,12 +11,13 @@ namespace PharmacyProject.Infrastructure.Persistence.Context
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Pharmacy> Pharmacies { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<District> Districts { get; set; }
-        public DbSet<Pharmacy> Pharmacies { get; set; }
-        public DbSet<UnmatchedPharmacy> UnmatchedPharmacies { get; set; }
         public DbSet<InsuranceCompany> InsuranceCompanies { get; set; }
         public DbSet<PharmacyInsurance> PharmacyInsurances { get; set; }
+        public DbSet<UnmatchedPharmacy> UnmatchedPharmacies { get; set; }
+        public DbSet<SystemLog> Logs { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
