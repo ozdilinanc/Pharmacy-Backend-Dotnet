@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Infrastructure.ExternalServices.ScraperServices;
+using System.Security.Claims;
 using System.Text;
 
 namespace PharmacyProject.Presentation;
@@ -34,7 +35,8 @@ public static class DependencyInjection
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = configuration["Jwt:Issuer"],
                 ValidAudience = configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret!))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret!)),
+                RoleClaimType = ClaimTypes.Role // Rol doğrulamasının kesin çalışması için eklendi
             };
         });
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.Services;
@@ -6,7 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // TODO: [Authorize(Roles = "Admin")] EKLENECEK
+    [Authorize(Roles = "Admin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminManualMatchService _adminManualMatchService;

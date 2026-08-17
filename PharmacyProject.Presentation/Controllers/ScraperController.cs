@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Core.Enums;
 
@@ -6,6 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin")]
     public class ScraperController : ControllerBase
     {
         private readonly IEnumerable<IInsuranceScraperService> _scraperServices;

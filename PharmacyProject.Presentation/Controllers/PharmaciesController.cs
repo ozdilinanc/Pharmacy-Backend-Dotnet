@@ -7,7 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize] // Controller genelinde sadece giriş yapılmış olması yeterli
     public class PharmaciesController : ControllerBase
     {
         private readonly IPharmacyService _pharmacyService;
@@ -17,7 +17,6 @@ namespace PharmacyProject.Presentation.Controllers
             _pharmacyService = pharmacyService;
         }
 
-        [Authorize]
         [HttpGet("{citySlug}/{districtSlug?}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetByLocation(string citySlug, string? districtSlug = null, [FromQuery] bool? isOnDuty = null, [FromQuery] List<int>? insuranceIds = null)
@@ -26,6 +25,7 @@ namespace PharmacyProject.Presentation.Controllers
             return Ok(pharmacies);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
@@ -33,6 +33,7 @@ namespace PharmacyProject.Presentation.Controllers
             return Ok(await _pharmacyService.GetAllAsync());
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,6 +43,7 @@ namespace PharmacyProject.Presentation.Controllers
             return Ok(pharmacy);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,6 +53,7 @@ namespace PharmacyProject.Presentation.Controllers
             return CreatedAtAction(nameof(GetById), new { id = createdPharmacy.Id }, createdPharmacy);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -66,6 +69,7 @@ namespace PharmacyProject.Presentation.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
