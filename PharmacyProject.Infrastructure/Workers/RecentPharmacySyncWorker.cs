@@ -33,7 +33,8 @@ namespace PharmacyProject.Infrastructure.Workers
                     var uow = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Interfaces.Repositories.IUnitOfWork>();
 
                     var recentPharmacies = await nosyApiService.GetRecentPharmaciesAsync();
-                    var allDbPharmacies = await pharmacyService.GetAllAsync();
+                    var allDbPharmaciesResult = await pharmacyService.GetAllAsync(1, int.MaxValue);
+                    var allDbPharmacies = allDbPharmaciesResult.Data.ToList();
                     
                     var allCities = await cityRepo.GetAllAsync();
                     var allDistricts = await districtRepo.GetAllAsync();

@@ -5,7 +5,7 @@ using PharmacyProject.Infrastructure.Persistence;
 using PharmacyProject.Infrastructure.Persistence.Context;
 using PharmacyProject.Presentation;
 
-// 1. Çevre Değişkenleri
+// 1. ÇEVRE DEĞİŞKENLERİ
 DotNetEnv.Env.TraversePath().Load();
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +40,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// CORS Middleware Authentication'dan ÖNCE eklenmeli!
+// CORS
 app.UseCors("AllowAll");
 
 app.UseAuthentication();

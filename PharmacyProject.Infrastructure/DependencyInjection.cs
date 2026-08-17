@@ -27,7 +27,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
 
-        // 2. Repositories (Kaslar)
+        // 2. Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
@@ -54,7 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenService, TokenService>();
 
-        // 5. Hangfire (Arka Plan İşçisi)
+        // 5. Hangfire
         services.AddHangfire(config => config
             .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
             .UseSimpleAssemblyNameTypeSerializer()

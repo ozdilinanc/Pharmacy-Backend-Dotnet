@@ -9,7 +9,7 @@ public static class HangfireJobScheduler
 {
     public static void ScheduleRecurringJobs()
     {
-        // 1. Nöbetçi Eczane Her Gece 00:05 (Şimdilik API Rate Limit koruması için kapatıldı)
+        // 1. Nöbetçi Eczane Her Gece 00:05
         RecurringJob.AddOrUpdate<OnDutyPharmacySyncWorker>(
             "nobetci-eczane-guncelle",
             worker => worker.SyncOnDutyPharmaciesAsync(),
@@ -25,7 +25,7 @@ public static class HangfireJobScheduler
             new RecurringJobOptions { TimeZone = TimeZoneInfo.Local }
         );
 
-        // 3. Anlaşmalı Sigortalar Haftada 1 (Pazar günleri 1'er saat arayla)
+        // 3. Anlaşmalı Sigortalar Haftada 1 
 
         RecurringJob.AddOrUpdate<InsuranceSyncWorker>(
             "aksigorta-sync",

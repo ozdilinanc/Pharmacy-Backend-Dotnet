@@ -36,7 +36,7 @@ public static class DependencyInjection
                 ValidIssuer = configuration["Jwt:Issuer"],
                 ValidAudience = configuration["Jwt:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret!)),
-                RoleClaimType = ClaimTypes.Role // Rol doğrulamasının kesin çalışması için eklendi
+                RoleClaimType = ClaimTypes.Role 
             };
         });
 

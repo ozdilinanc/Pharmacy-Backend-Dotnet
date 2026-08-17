@@ -7,7 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Controller genelinde sadece giriş yapılmış olması yeterli
+    [Authorize]      
     public class PharmaciesController : ControllerBase
     {
         private readonly IPharmacyService _pharmacyService;

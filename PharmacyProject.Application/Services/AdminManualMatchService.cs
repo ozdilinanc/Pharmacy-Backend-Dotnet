@@ -3,6 +3,8 @@ using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Services;
 using PharmacyProject.Core.Entities;
 
+using PharmacyProject.Application.DTOs.Common;
+
 namespace PharmacyProject.Application.Services
 {
     public class AdminManualMatchService : IAdminManualMatchService
@@ -24,11 +26,11 @@ namespace PharmacyProject.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<UnmatchedPharmacyDto>> GetUnmatchedPharmaciesAsync()
+        public async Task<PagedResponse<UnmatchedPharmacyDto>> GetUnmatchedPharmaciesAsync(int pageNumber = 1, int pageSize = 50)
         {
-            var unmatched = await _unmatchedPharmacyRepository.FindAsync(u => !u.IsResolved);
+            var result = await _unmatchedPharmacyRepository.GetUnmatchedWithDetailsAsync(u => !u.IsResolved, pageNumber, pageSize);
             
-            return unmatched.Select(u => new UnmatchedPharmacyDto
+            var mappedData = result.UnmatchedPharmacies.Select(u => new UnmatchedPharmacyDto
             {
                 Id = u.Id,
                 ScrapedName = u.ScrapedName,
@@ -40,6 +42,8 @@ namespace PharmacyProject.Application.Services
                 DistrictId = u.DistrictId,
                 CreatedAt = u.CreatedAt
             });
+
+            return new PagedResponse<UnmatchedPharmacyDto>(mappedData, result.TotalCount, pageNumber, pageSize);
         }
 
         public async Task MatchPharmacyAsync(ManualMatchRequestDto matchRequestDto)
@@ -105,11 +109,13 @@ namespace PharmacyProject.Application.Services
 
             if (unmatched.CityId.HasValue)
             {
-                suggestions = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.District.CityId == unmatched.CityId.Value);
+                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.District.CityId == unmatched.CityId.Value, 1, int.MaxValue);
+                suggestions = result.Pharmacies;
             }
             else
             {
-                suggestions = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(); // Fallback to all (limit is applied below)
+                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(null, 1, int.MaxValue); // Fallback to all (limit is applied below)
+                suggestions = result.Pharmacies;
             }
 
             string normalizedUnmatchedName = PharmacyProject.Application.Helpers.TextHelper.NormalizeName(unmatched.ScrapedName);

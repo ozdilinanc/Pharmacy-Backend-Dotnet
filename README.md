@@ -36,7 +36,7 @@ Bu proje, sürdürülebilirlik, yüksek performans ve kodun test edilebilirliği
 - **Konfigürasyon Güvenliği:** .NET User Secrets ve Docker ortam değişkenleri (API anahtarları ve şifrelerin gizliliği için)
 ---
 
-## 📂 Proje Mimarisi ve Geliştirme Durumu (✅ Bitenler)
+## 📂 Proje Mimarisi ve Geliştirme Durumu
 
 <pre>
 PharmacyProject.sln

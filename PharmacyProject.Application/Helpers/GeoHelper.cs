@@ -4,7 +4,7 @@
     {
         public static double CalculateDistanceInMeters(double lat1, double lon1, double lat2, double lon2)
         {
-            var R = 6371e3; // Dünyanın yarıçapı (Metre)
+            var R = 6371e3;
             var phi1 = lat1 * Math.PI / 180;
             var phi2 = lat2 * Math.PI / 180;
             var deltaPhi = (lat2 - lat1) * Math.PI / 180;

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Core.Entities;
 using PharmacyProject.Infrastructure.Persistence.Context;
@@ -12,16 +12,27 @@ namespace PharmacyProject.Infrastructure.Persistence.Repositories
         {
         }
 
-        public async Task<IEnumerable<Pharmacy>> GetPharmaciesWithDetailsAsync(Expression<Func<Pharmacy, bool>>? predicate = null)
+        public async Task<(IEnumerable<Pharmacy> Pharmacies, int TotalCount)> GetPharmaciesWithDetailsAsync(Expression<Func<Pharmacy, bool>>? predicate = null, int pageNumber = 1, int pageSize = 50)
         {
-            var query = _dbSet.Include(p => p.District).ThenInclude(d => d.City).AsQueryable();
+            var query = _dbSet
+                .Include(p => p.District).ThenInclude(d => d.City)
+                .Include(p => p.PharmacyInsurances).ThenInclude(pi => pi.InsuranceCompany)
+                .AsQueryable();
             
             if (predicate != null)
             {
                 query = query.Where(predicate);
             }
             
-            return await query.ToListAsync();
+            int totalCount = await query.CountAsync();
+            
+            var pharmacies = await query
+                .OrderBy(p => p.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+                
+            return (pharmacies, totalCount);
         }
     }
 }

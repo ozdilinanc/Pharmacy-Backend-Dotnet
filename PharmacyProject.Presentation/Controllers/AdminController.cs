@@ -18,9 +18,9 @@ namespace PharmacyProject.Presentation.Controllers
         }
 
         [HttpGet("unmatched")]
-        public async Task<IActionResult> GetUnmatchedPharmacies()
+        public async Task<IActionResult> GetUnmatchedPharmacies([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 50)
         {
-            var result = await _adminManualMatchService.GetUnmatchedPharmaciesAsync();
+            var result = await _adminManualMatchService.GetUnmatchedPharmaciesAsync(pageNumber, pageSize);
             return Ok(result);
         }
 

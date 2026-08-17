@@ -88,10 +88,8 @@ namespace PharmacyProject.Application.Services
                 }
 
                 // Sadece bu batch için gerekli olan eczaneleri (Şehre göre) veritabanından çek (Optimizasyon)
-                var dbPharmacies = new List<Pharmacy>();
-                
-                var cityPharmacies = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => targetCityIds.Contains(p.District.CityId));
-                dbPharmacies.AddRange(cityPharmacies);
+                var dbPharmaciesResult = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.District != null && targetCityIds.Contains(p.District.CityId), 1, int.MaxValue);
+                var dbPharmacies = dbPharmaciesResult.Pharmacies.ToList();
                 
                 foreach (var scraped in batch)
                 {

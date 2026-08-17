@@ -95,7 +95,6 @@ namespace PharmacyProject.Infrastructure.Workers
                             }
                         }
                         
-                        // Her il sonrası rate limit'i çok zorlamamak için ufak bir bekleme (Opsiyonel, ancak faydalı)
                         await Task.Delay(1000); 
                     }
 

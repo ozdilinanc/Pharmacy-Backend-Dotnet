@@ -1,3 +1,4 @@
+using PharmacyProject.Application.DTOs.Common;
 using PharmacyProject.Application.DTOs.Pharmacy;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Application.Interfaces.Services;
@@ -60,11 +61,11 @@ namespace PharmacyProject.Application.Services
             };
         }
 
-        public async Task<IEnumerable<PharmacyResponseDto>> GetAllAsync()
+        public async Task<PagedResponse<PharmacyResponseDto>> GetAllAsync(int pageNumber = 1, int pageSize = 50)
         {
-            var pharmacies = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync();
+            var result = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync(null, pageNumber, pageSize);
 
-            return pharmacies.Select(p => new PharmacyResponseDto
+            var mappedData = result.Pharmacies.Select(p => new PharmacyResponseDto
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -75,18 +76,21 @@ namespace PharmacyProject.Application.Services
                 DistrictId = p.DistrictId,
                 DistrictName = p.District?.Name
             });
+            
+            return new PagedResponse<PharmacyResponseDto>(mappedData, result.TotalCount, pageNumber, pageSize);
         }
         
-        public async Task<IEnumerable<PharmacyResponseDto>> GetByLocationAsync(string citySlug, string? districtSlug = null, bool? isOnDuty = null, List<int>? insuranceIds = null)
+        public async Task<PagedResponse<PharmacyResponseDto>> GetByLocationAsync(string citySlug, string? districtSlug = null, bool? isOnDuty = null, List<int>? insuranceIds = null, int pageNumber = 1, int pageSize = 50)
         {
-            var pharmacies = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync(p => 
+            var result = await _unitOfWork.Pharmacies.GetPharmaciesWithDetailsAsync(p => 
                 (string.IsNullOrEmpty(citySlug) || p.District.City.Slug == citySlug) &&
                 (string.IsNullOrEmpty(districtSlug) || p.District.Slug == districtSlug) &&
                 (!isOnDuty.HasValue || p.IsOnDuty == isOnDuty.Value) &&
-                (insuranceIds == null || !insuranceIds.Any() || p.PharmacyInsurances.Any(pi => insuranceIds.Contains(pi.InsuranceCompanyId)))
+                (insuranceIds == null || !insuranceIds.Any() || p.PharmacyInsurances.Any(pi => insuranceIds.Contains(pi.InsuranceCompanyId))),
+                pageNumber, pageSize
             );
 
-            return pharmacies.Select(p => new PharmacyResponseDto
+            var mappedData = result.Pharmacies.Select(p => new PharmacyResponseDto
             {
                 Id = p.Id,
                 Name = p.Name,
@@ -102,6 +106,8 @@ namespace PharmacyProject.Application.Services
                     Name = pi.InsuranceCompany.Name 
                 }).ToList()
             });
+            
+            return new PagedResponse<PharmacyResponseDto>(mappedData, result.TotalCount, pageNumber, pageSize);
         }
 
         public async Task UpdateAsync(UpdatePharmacyDto updatePharmacyDto)
