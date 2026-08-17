@@ -119,6 +119,25 @@ namespace PharmacyProject.Infrastructure.Persistence
             public List<DistrictSeedModel> Districts { get; set; } = new();
         }
 
+        public static async Task SeedSuperAdminAsync(AppDbContext context, PharmacyProject.Application.Interfaces.Security.IPasswordHasher passwordHasher, string defaultPassword)
+        {
+            if (!context.Users.Any(u => u.Role == PharmacyProject.Core.Enums.UserRole.SuperAdmin))
+            {
+                var superAdmin = new User
+                {
+                    FirstName = "Super",
+                    LastName = "Admin",
+                    Email = "superadmin@pharmacy.com",
+                    PasswordHash = passwordHasher.HashPassword(defaultPassword),
+                    Role = PharmacyProject.Core.Enums.UserRole.SuperAdmin,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await context.Users.AddAsync(superAdmin);
+                await context.SaveChangesAsync();
+            }
+        }
+
         private class DistrictSeedModel
         {
             public string Name { get; set; } = string.Empty;

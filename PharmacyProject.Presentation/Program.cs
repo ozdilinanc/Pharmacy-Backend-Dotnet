@@ -96,9 +96,14 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var passwordHasher = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Interfaces.Security.IPasswordHasher>();
+    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+    var superAdminDefaultPassword = config["SuperAdminDefaultPassword"] ?? "SuperAdmin123!";
+    
     await DatabaseSeeder.SeedCitiesAndDistrictsAsync(context);
     await DatabaseSeeder.SeedPharmaciesAsync(context);
     await DatabaseSeeder.SeedInsuranceCompaniesAsync(context);
+    await DatabaseSeeder.SeedSuperAdminAsync(context, passwordHasher, superAdminDefaultPassword);
 }
 
 // 5. HANGFIRE TIMERS
