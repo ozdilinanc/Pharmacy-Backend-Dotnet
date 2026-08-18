@@ -252,6 +252,12 @@ namespace PharmacyProject.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<double?>("ScrapedLatitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("ScrapedLongitude")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("ScrapedName")
                         .IsRequired()
                         .HasColumnType("text");

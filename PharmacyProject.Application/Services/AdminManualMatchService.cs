@@ -44,6 +44,8 @@ namespace PharmacyProject.Application.Services
                 DataSource = u.DataSource,
                 CityId = u.CityId,
                 DistrictId = u.DistrictId,
+                ScrapedLatitude = u.ScrapedLatitude,
+                ScrapedLongitude = u.ScrapedLongitude,
                 CreatedAt = u.CreatedAt
             });
 
@@ -90,6 +92,52 @@ namespace PharmacyProject.Application.Services
             _logger.LogInformation("Admin eşleştirmesi yapıldı. Karantina ID: {UnmatchedId} -> Hedef Eczane ID: {RealPharmacyId}", matchRequestDto.UnmatchedPharmacyId, matchRequestDto.RealPharmacyId);
         }
 
+        public async Task ApproveAsNewPharmacyAsync(int unmatchedPharmacyId, ApproveAsNewDto dto)
+        {
+            var unmatched = await _unmatchedPharmacyRepository.GetByIdAsync(unmatchedPharmacyId);
+            if (unmatched == null || unmatched.IsResolved)
+            {
+                throw new Exception("Karantina kaydi bulunamadi veya zaten cozumlenmis.");
+            }
+
+            if (!unmatched.DistrictId.HasValue)
+            {
+                throw new Exception("İlçe bilgisi eksik olduğu için yeni eczane olarak eklenemez. Lütfen manuel eşleştirin.");
+            }
+
+            var newPharmacy = new Pharmacy
+            {
+                Name = !string.IsNullOrWhiteSpace(dto.Name) ? dto.Name : unmatched.ScrapedName,
+                Address = !string.IsNullOrWhiteSpace(dto.Address) ? dto.Address : unmatched.ScrapedAddress,
+                PhoneNumber = !string.IsNullOrWhiteSpace(dto.PhoneNumber) ? dto.PhoneNumber : (unmatched.ScrapedPhoneNumber ?? string.Empty),
+                Latitude = dto.Latitude,
+                Longitude = dto.Longitude,
+                DistrictId = unmatched.DistrictId.Value,
+                IsOnDuty = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var addedPharmacy = await _pharmacyRepository.AddAsync(newPharmacy);
+
+            if (unmatched.SourceInsurance.HasValue)
+            {
+                await _pharmacyInsuranceRepository.AddAsync(new PharmacyInsurance
+                {
+                    Pharmacy = addedPharmacy,
+                    InsuranceCompanyId = (int)unmatched.SourceInsurance.Value
+                });
+            }
+
+            unmatched.IsResolved = true;
+            unmatched.MatchedPharmacy = addedPharmacy;
+            unmatched.UpdatedAt = DateTime.UtcNow;
+
+            _unmatchedPharmacyRepository.Update(unmatched);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Karantinadaki kayıt yeni eczane olarak onaylandı. Karantina ID: {UnmatchedId} -> Yeni Eczane ID: {PharmacyId}", unmatchedPharmacyId, addedPharmacy.Id);
+        }
+
         public async Task DeleteUnmatchedPharmacyAsync(int unmatchedPharmacyId)
         {
             var unmatched = await _unmatchedPharmacyRepository.GetByIdAsync(unmatchedPharmacyId);
@@ -112,33 +160,64 @@ namespace PharmacyProject.Application.Services
 
             IEnumerable<Pharmacy> suggestions = new List<Pharmacy>();
 
-            if (unmatched.CityId.HasValue)
+            // 1. Olası eczaneleri getir (ilçe belliyse sadece o ilçe, yoksa il, yoksa hepsi)
+            if (unmatched.DistrictId.HasValue)
             {
-                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.District.CityId == unmatched.CityId.Value, 1, int.MaxValue);
+                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.DistrictId == unmatched.DistrictId.Value, 1, 1000); 
+                suggestions = result.Pharmacies;
+            }
+            else if (unmatched.CityId.HasValue)
+            {
+                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(p => p.District.CityId == unmatched.CityId.Value, 1, 2000);
                 suggestions = result.Pharmacies;
             }
             else
             {
-                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(null, 1, int.MaxValue); // Fallback to all (limit is applied below)
+                var result = await _pharmacyRepository.GetPharmaciesWithDetailsAsync(null, 1, 1000); 
                 suggestions = result.Pharmacies;
             }
 
             string normalizedUnmatchedName = PharmacyProject.Application.Helpers.TextHelper.NormalizeName(unmatched.ScrapedName);
+            string normalizedUnmatchedPhone = PharmacyProject.Application.Helpers.TextHelper.NormalizePhone(unmatched.ScrapedPhoneNumber);
+            string normalizedUnmatchedAddress = PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(unmatched.ScrapedAddress);
 
             var topSuggestions = suggestions.Select(p => 
             {
                 string normalizedDbName = PharmacyProject.Application.Helpers.TextHelper.NormalizeName(p.Name);
-                double score = PharmacyProject.Application.Helpers.TextHelper.CalculateSimilarity(normalizedUnmatchedName, normalizedDbName);
+                double nameScore = PharmacyProject.Application.Helpers.TextHelper.CalculateSimilarity(normalizedUnmatchedName, normalizedDbName);
                 
-                if (unmatched.DistrictId.HasValue && p.DistrictId == unmatched.DistrictId.Value)
+                double phoneScore = 0;
+                if (!string.IsNullOrEmpty(normalizedUnmatchedPhone))
                 {
-                    score += 20.0;
+                    string normalizedDbPhone = PharmacyProject.Application.Helpers.TextHelper.NormalizePhone(p.PhoneNumber);
+                    if (!string.IsNullOrEmpty(normalizedDbPhone) && normalizedDbPhone == normalizedUnmatchedPhone)
+                    {
+                        phoneScore = 100.0;
+                    }
                 }
 
-                return new { Pharmacy = p, Score = score };
+                double addressScore = 0;
+                if (!string.IsNullOrEmpty(normalizedUnmatchedAddress))
+                {
+                    string normalizedDbAddress = PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(p.Address);
+                    addressScore = PharmacyProject.Application.Helpers.TextHelper.CalculateSimilarity(normalizedUnmatchedAddress, normalizedDbAddress) * 0.4;
+                }
+
+                double totalScore = nameScore + phoneScore + addressScore;
+
+                if (unmatched.DistrictId.HasValue && p.DistrictId == unmatched.DistrictId.Value)
+                {
+                    totalScore += 20.0;
+                }
+                else if (unmatched.CityId.HasValue && p.District.CityId == unmatched.CityId.Value)
+                {
+                    totalScore += 10.0;
+                }
+
+                return new { Pharmacy = p, Score = totalScore };
             })
             .OrderByDescending(x => x.Score)
-            .Take(20)
+            .Take(100)
             .Select(x => x.Pharmacy)
             .ToList();
 

@@ -32,8 +32,16 @@ Bu proje, sürdürülebilirlik, yüksek performans ve kodun test edilebilirliği
 ### 🔹 Güvenlik, Motor ve API Standartları
 - **Akıllı Eşleştirme Motoru:** Metin benzerliği (Levenshtein Distance vs.), Geo-Coordinate (Enlem/Boylam mesafe hesaplama) ve normalize edilmiş telefon numaraları üzerinden dağınık verileri eşleştirme yeteneği.
 - **Hata Yönetimi (Resilience & Fallback):** Eşleşmeyen verilerin kaybolmaması için Karantina (`UnmatchedPharmacy`) tablosu ve merkezi `GlobalExceptionMiddleware`.
-- **Kimlik Doğrulama:** JWT (JSON Web Token) tabanlı yetkilendirme (Planlanıyor)
+- **Kimlik Doğrulama:** JWT (JSON Web Token) tabanlı Role-Based yetkilendirme (User, Admin, SuperAdmin).
 - **Konfigürasyon Güvenliği:** .NET User Secrets ve Docker ortam değişkenleri (API anahtarları ve şifrelerin gizliliği için)
+---
+
+## 🖥️ PharmacyAdminUI (React Yönetim Paneli)
+Bu projeye entegre olarak çalışan React tabanlı bir yönetim paneli mevcuttur.
+- **Karantina Yönetimi:** Akıllı eşleştirme motorunun eşleştiremediği eczaneleri manuel olarak sistemdeki eczanelerle eşleştirme arayüzü.
+- **Eczane Ekleme:** SuperAdmin yetkisine sahip kullanıcıların sisteme sıfırdan eczane ekleyebildiği panel.
+- **Admin Yönetimi:** SuperAdmin yetkisine sahip kullanıcıların diğer kullanıcıların yetkilerini (Admin, User, SuperAdmin) güncelleyebildiği yönetim ekranı.
+- **Güvenlik:** Role-based access control (RBAC) ile normal kullanıcıların panele erişimi JWT üzerinden React tarafında engellenmiştir.
 ---
 
 ## 📂 Proje Mimarisi ve Geliştirme Durumu
@@ -96,11 +104,12 @@ PharmacyProject.sln
 │   │   ├── PharmacyMatchingService.cs ✅
 │   │   ├── AuthService.cs ✅
 │   │   ├── PharmacyService.cs ✅
+│   │   ├── SuperAdminService.cs ✅
 │   │   └── AdminManualMatchService.cs ✅
 │   ├── Helpers/
 │   │   ├── TextHelper.cs ✅
 │   │   └── GeoHelper.cs ✅
-│   └── DependencyInjection.cs
+│   └── DependencyInjection.cs ✅
 │
 ├── 3. Infrastructure Katmanı
 │   ├── Persistence/
@@ -145,12 +154,16 @@ PharmacyProject.sln
     ├── Controllers/
     │   ├── AuthController.cs ✅
     │   ├── PharmaciesController.cs ✅
+    │   ├── SuperAdminController.cs ✅
     │   └── AdminController.cs ✅
+    ├── Extensions/
+    │   ├── SerilogExtensions.cs ✅
+    │   └── ApplicationBuilderExtensions.cs ✅
     ├── Middleware/
     │   └── GlobalExceptionMiddleware.cs ✅
     ├── ililce.json
     ├── pharmacies_seed.json
-    ├── Program.cs
-    ├── DependencyInjection.cs
+    ├── Program.cs ✅
+    ├── DependencyInjection.cs ✅
     └── appsettings.json
 </pre>

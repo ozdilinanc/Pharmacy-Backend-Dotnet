@@ -8,6 +8,7 @@ namespace PharmacyProject.Application.Interfaces.Services
     {
         Task<PagedResponse<UnmatchedPharmacyDto>> GetUnmatchedPharmaciesAsync(int pageNumber = 1, int pageSize = 50);
         Task MatchPharmacyAsync(ManualMatchRequestDto matchRequestDto);
+        Task ApproveAsNewPharmacyAsync(int unmatchedPharmacyId, ApproveAsNewDto dto);
         Task DeleteUnmatchedPharmacyAsync(int unmatchedPharmacyId);
         Task<IEnumerable<PharmacyResponseDto>> GetSuggestionsAsync(int unmatchedPharmacyId);
     }

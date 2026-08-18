@@ -205,7 +205,9 @@ namespace PharmacyProject.Application.Services
                             IsResolved = false,
                             MatchedPharmacyId = null,
                             CityId = scrapedCityId,
-                            DistrictId = scrapedDistrictId
+                            DistrictId = scrapedDistrictId,
+                            ScrapedLatitude = scraped.Latitude,
+                            ScrapedLongitude = scraped.Longitude
                         };
 
                         await _unmatchedPharmacyRepository.AddAsync(unmatchedPharmacy);

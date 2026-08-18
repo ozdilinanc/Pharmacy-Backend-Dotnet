@@ -12,6 +12,8 @@ namespace PharmacyProject.Application.DTOs.Pharmacy
         public string DataSource { get; set; } = string.Empty;
         public int? CityId { get; set; }
         public int? DistrictId { get; set; }
+        public double? ScrapedLatitude { get; set; }
+        public double? ScrapedLongitude { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

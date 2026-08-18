@@ -32,10 +32,11 @@ namespace PharmacyProject.Infrastructure.Workers
                     var unmatchedRepo = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Interfaces.Repositories.IUnmatchedPharmacyRepository>();
                     var uow = scope.ServiceProvider.GetRequiredService<PharmacyProject.Application.Interfaces.Repositories.IUnitOfWork>();
 
+                    /**/
                     var recentPharmacies = await nosyApiService.GetRecentPharmaciesAsync();
                     var allDbPharmaciesResult = await pharmacyService.GetAllAsync(1, int.MaxValue);
                     var allDbPharmacies = allDbPharmaciesResult.Data.ToList();
-                    
+
                     var allCities = await cityRepo.GetAllAsync();
                     var allDistricts = await districtRepo.GetAllAsync();
                     var cityLookup = allCities.ToDictionary(c => PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(c.Name), c => c.Id);
@@ -48,7 +49,7 @@ namespace PharmacyProject.Infrastructure.Workers
 
                         bool existsInDb = allDbPharmacies.Any(dbP =>
                             PharmacyProject.Application.Helpers.TextHelper.NormalizePhone(dbP.PhoneNumber) == normalizedApiPhone ||
-                            (dbP.Name != null && apiPharmacy.PharmacyName != null && 
+                            (dbP.Name != null && apiPharmacy.PharmacyName != null &&
                              PharmacyProject.Application.Helpers.TextHelper.NormalizeName(dbP.Name) == normalizedApiName));
 
                         if (!existsInDb)
@@ -96,10 +97,13 @@ namespace PharmacyProject.Infrastructure.Workers
                             }
                         }
                     }
+                    /**/
 
                     _logger.LogInformation("Hangfire: Yeni eczane senkronizasyonu tamamlandı.");
                 }
+
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Hangfire: RecentPharmacySyncWorker hata fırlattı.");

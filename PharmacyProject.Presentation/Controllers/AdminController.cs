@@ -7,7 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class AdminController : ControllerBase
     {
         private readonly IAdminManualMatchService _adminManualMatchService;
@@ -43,6 +43,20 @@ namespace PharmacyProject.Presentation.Controllers
         {
             await _adminManualMatchService.DeleteUnmatchedPharmacyAsync(id);
             return Ok(new { Message = "Karantina kaydı silindi." });
+        }
+
+        [HttpPost("unmatched/{id}/approve")]
+        public async Task<IActionResult> ApproveAsNewPharmacy(int id, [FromBody] ApproveAsNewDto dto)
+        {
+            try
+            {
+                await _adminManualMatchService.ApproveAsNewPharmacyAsync(id, dto);
+                return Ok(new { Message = "Eczane başarıyla yeni kayıt olarak eklendi." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
         }
 
         [HttpGet("unmatched/{id}/suggestions")]

@@ -15,5 +15,8 @@ namespace PharmacyProject.Core.Entities
         
         public int? CityId { get; set; }
         public int? DistrictId { get; set; }
+        
+        public double? ScrapedLatitude { get; set; }
+        public double? ScrapedLongitude { get; set; }
     }
 }

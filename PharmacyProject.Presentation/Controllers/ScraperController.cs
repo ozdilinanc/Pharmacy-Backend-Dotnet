@@ -7,7 +7,7 @@ namespace PharmacyProject.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class ScraperController : ControllerBase
     {
         private readonly IEnumerable<IInsuranceScraperService> _scraperServices;

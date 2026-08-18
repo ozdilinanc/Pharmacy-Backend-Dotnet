@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using PharmacyProject.Application.Interfaces.External;
 using PharmacyProject.Application.Interfaces.Repositories;
 using PharmacyProject.Core.Entities;
-using System.Globalization;
 
 namespace PharmacyProject.Infrastructure.Workers
 {
@@ -46,11 +45,12 @@ namespace PharmacyProject.Infrastructure.Workers
                     var allCities = await cityRepo.GetAllAsync();
                     var allDistricts = await districtRepo.GetAllAsync();
 
+                    /**/
                     foreach (var city in allCities)
                     {
                         string cityQuery = city.Slug ?? city.Name;
                         _logger.LogInformation($"Hangfire: {city.Name} ili için nöbetçi eczaneler çekiliyor...");
-                        
+
                         var apiPharmacies = await nosyApiService.GetOnDutyPharmaciesAsync(cityQuery);
 
                         foreach (var apiPharmacy in apiPharmacies)
@@ -76,8 +76,8 @@ namespace PharmacyProject.Infrastructure.Workers
                             {
                                 _logger.LogWarning($"Eşleşme bulunamadı, tabloya ekleniyor! Eczane: {apiPharmacy.PharmacyName}, İlçe: {apiPharmacy.District}");
 
-                                var matchedDistrict = allDistricts.FirstOrDefault(d => 
-                                    d.CityId == city.Id && 
+                                var matchedDistrict = allDistricts.FirstOrDefault(d =>
+                                    d.CityId == city.Id &&
                                     PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(d.Name) == PharmacyProject.Application.Helpers.TextHelper.NormalizeLocationName(apiPharmacy.District ?? ""));
 
                                 var unmatched = new UnmatchedPharmacy
@@ -94,9 +94,10 @@ namespace PharmacyProject.Infrastructure.Workers
                                 await unmatchedRepo.AddAsync(unmatched);
                             }
                         }
-                        
-                        await Task.Delay(1000); 
+
+                        await Task.Delay(1000);
                     }
+                    /**/
 
                     await uow.SaveChangesAsync();
                     _logger.LogInformation("Hangfire: Nöbetçi eczane senkronizasyonu başarıyla tamamlandı.");

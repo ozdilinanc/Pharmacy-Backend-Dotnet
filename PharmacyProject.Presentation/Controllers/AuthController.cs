@@ -42,5 +42,19 @@ namespace PharmacyProject.Presentation.Controllers
                 throw; 
             }
         }
+
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [HttpGet("me")]
+        public IActionResult GetMe()
+        {
+            var claims = User.Claims.Select(c => new { c.Type, c.Value });
+            return Ok(new { 
+                identityName = User.Identity?.Name, 
+                authenticationType = User.Identity?.AuthenticationType,
+                isInSuperAdmin = User.IsInRole("SuperAdmin"),
+                isInAdmin = User.IsInRole("Admin"),
+                claims 
+            });
+        }
     }
 }
