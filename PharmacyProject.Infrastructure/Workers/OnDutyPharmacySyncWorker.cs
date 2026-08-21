@@ -45,7 +45,7 @@ namespace PharmacyProject.Infrastructure.Workers
                     var allCities = await cityRepo.GetAllAsync();
                     var allDistricts = await districtRepo.GetAllAsync();
 
-                    /**/
+                /*
                     foreach (var city in allCities)
                     {
                         string cityQuery = city.Slug ?? city.Name;
@@ -97,7 +97,8 @@ namespace PharmacyProject.Infrastructure.Workers
 
                         await Task.Delay(1000);
                     }
-                    /**/
+
+                    */
 
                     await uow.SaveChangesAsync();
                     _logger.LogInformation("Hangfire: Nöbetçi eczane senkronizasyonu başarıyla tamamlandı.");

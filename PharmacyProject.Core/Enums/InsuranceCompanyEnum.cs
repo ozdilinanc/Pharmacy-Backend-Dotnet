@@ -1,14 +1,14 @@
-﻿namespace PharmacyProject.Core.Enums
+namespace PharmacyProject.Core.Enums
 {
     public enum InsuranceCompanyEnum
     {
-        Allianz = 1,
-        TurkiyeSigorta = 2,
-        MapfreSigorta = 3,
-        EurekoSigorta = 4,
+        Aksigorta = 1,
+        Allianz = 2,
+        AnadoluSigorta = 3,
+        AxaSigorta = 4,
         BupaAcibademSigorta = 5,
-        AxaSigorta = 6,
-        AnadoluSigorta = 7,
-        Aksigorta = 8,
+        EurekoSigorta = 6,
+        MapfreSigorta = 7,
+        TurkiyeSigorta = 8,
     }
 }
